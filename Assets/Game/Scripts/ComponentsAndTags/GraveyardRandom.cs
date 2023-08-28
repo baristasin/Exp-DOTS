@@ -1,7 +1,10 @@
 using Unity.Entities;
 using Unity.Mathematics;
 
-public struct GraveyardRandom : IComponentData
+namespace Game.Scripts
 {
-    public Random Value;
+    public struct GraveyardRandom : IComponentData
+    {
+        public Random Value;
+    }
 }

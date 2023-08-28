@@ -11,6 +11,8 @@ namespace Game.Scripts
         public int NumberTombstonesToSpawn;
         public GameObject TombstonePrefab;
         public uint RandomSeed;
+        public GameObject ZombiePrefab;
+        public float ZombieSpawnRate;
     }
 
     public class GraveyardBaker : Baker<GraveyardMono>
@@ -23,13 +25,19 @@ namespace Game.Scripts
             {
                 FieldDimensions = authoring.FieldDimensions,
                 NumberTombstonesToSpawn = authoring.NumberTombstonesToSpawn,
-                TombstonePrefab = GetEntity(authoring.TombstonePrefab,TransformUsageFlags.Dynamic)
+                TombstonePrefab = GetEntity(authoring.TombstonePrefab,TransformUsageFlags.Dynamic),
+                ZombiePrefab = GetEntity(authoring.ZombiePrefab,TransformUsageFlags.Dynamic),
+                ZombieSpawnRate = authoring.ZombieSpawnRate
             });
+
             AddComponent(entity, new GraveyardRandom
             {
                 Value = Random.CreateFromIndex(authoring.RandomSeed)
             });
 
+            AddComponent(entity, new ZombieSpawnPoints());
+
+            AddComponent(entity, new ZombieSpawnTimer());
         }
     }
 }

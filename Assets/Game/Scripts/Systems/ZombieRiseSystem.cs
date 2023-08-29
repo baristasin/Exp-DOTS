@@ -26,7 +26,7 @@ namespace Game.Scripts
         {
             var deltaTime = SystemAPI.Time.DeltaTime;
             var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
-
+         
             new ZombieRiseJob
             {
                 DeltaTime = deltaTime,
@@ -46,6 +46,7 @@ namespace Game.Scripts
                 if (!zombieRiseAspect.IsAboveGround) return;
 
                 zombieRiseAspect.SetAtGroundLevel();
+                EntityCommandBuffer.SetComponentEnabled<ZombieWalkProperties>(sortKey, zombieRiseAspect.Entity,true);
                 EntityCommandBuffer.RemoveComponent<ZombieRiseRate>(sortKey,zombieRiseAspect.Entity);
             }
         }

@@ -13,12 +13,12 @@ namespace Game.Scripts
         private readonly RefRO<LocalTransform> _transform;
         private LocalTransform Transform => _transform.ValueRO;
 
-        private readonly RefRO<GraveyardProperties> _graveyardProperties;
+        private readonly RefRW<GraveyardProperties> _graveyardProperties;
         private readonly RefRW<GraveyardRandom> _graveyardRandom;
         private readonly RefRW<ZombieSpawnPoints> _zombieSpawnPoints;
         private readonly RefRW<ZombieSpawnTimer> _zombieSpawnTimer;
 
-        public readonly RefRO<GraveyardProperties> GraveyardProperties => _graveyardProperties;
+        public readonly RefRW<GraveyardProperties> GraveyardProperties => _graveyardProperties;
         public readonly RefRW<ZombieSpawnPoints> ZombieSpawnPoints => _zombieSpawnPoints;
 
         public LocalTransform GetRandomTombstoneTransform()

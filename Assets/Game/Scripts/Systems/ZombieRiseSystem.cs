@@ -1,6 +1,7 @@
 ﻿using System;
 using Unity.Burst;
 using Unity.Entities;
+using UnityEngine;
 
 namespace Game.Scripts
 {
@@ -40,14 +41,14 @@ namespace Game.Scripts
             public EntityCommandBuffer.ParallelWriter EntityCommandBuffer;
 
             [BurstCompile]
-            public void Execute(ZombieRiseAspect zombieRiseAspect, [EntityIndexInQuery] int sortKey)
+            public void Execute(ZombieRiseAspect zombieRiseAspect, [ChunkIndexInQuery] int sortKey)
             {
                 zombieRiseAspect.Rise(DeltaTime);
                 if (!zombieRiseAspect.IsAboveGround) return;
 
                 zombieRiseAspect.SetAtGroundLevel();
-                EntityCommandBuffer.SetComponentEnabled<ZombieWalkProperties>(sortKey, zombieRiseAspect.Entity,true);
                 EntityCommandBuffer.RemoveComponent<ZombieRiseRate>(sortKey,zombieRiseAspect.Entity);
+                EntityCommandBuffer.SetComponentEnabled<ZombieWalkProperties>(sortKey, zombieRiseAspect.Entity,true);
             }
         }
 

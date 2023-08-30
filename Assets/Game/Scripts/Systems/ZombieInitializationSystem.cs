@@ -1,17 +1,44 @@
 ﻿using System;
+using Game.Scripts;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 
-public partial struct ZombieInitializationSystem : ISystem
+namespace Game.Scripts
 {
-    public void OnUpdate(ref SystemState state)
+    [BurstCompile]
+    [UpdateInGroup(typeof(InitializationSystemGroup))]
+    [UpdateAfter(typeof(ZombieRiseSystem))]
+    public partial struct ZombieInitializationSystem : ISystem
     {
-        var ecb = new EntityCommandBuffer(Allocator.Temp);
-        foreach (var zombie in SystemAPI.Query<ZombieWalkAspect>().WithAll<ZombieMoveTag>())
+        [BurstCompile]
+        public void OnCreate(ref SystemState state)
         {
-            ecb.RemoveComponent<ZombieMoveTag>(zombie.Entity);
-            ecb.SetComponentEnabled<ZombieWalkProperties>(zombie.Entity, false);
+
+        }
+
+        [BurstCompile]
+        public void OnDestroy(ref SystemState state)
+        {
+
+        }
+
+        [BurstCompile]
+        public void OnUpdate(ref SystemState state)
+        {
+            var ecb = new EntityCommandBuffer(Allocator.Temp);
+            foreach (var zombie in SystemAPI.Query<ZombieWalkAspect>().WithAll<ZombieMoveTag>())
+            {
+                ecb.RemoveComponent<ZombieMoveTag>(zombie.Entity);
+                ecb.SetComponentEnabled<ZombieWalkProperties>(zombie.Entity, false);
+            }
+            foreach (var zombie in SystemAPI.Query<ZombieAttackAspect>().WithAll<ZombieAttackTag>())
+            {
+                ecb.RemoveComponent<ZombieAttackTag>(zombie.Entity);
+                ecb.SetComponentEnabled<ZombieAttackComponent>(zombie.Entity, false);
+            }
+            ecb.Playback(state.EntityManager);
         }
     }
-}
 
+}

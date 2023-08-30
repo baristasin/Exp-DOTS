@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 41620405}
   - component: {fileID: 41620406}
   - component: {fileID: 41620407}
+  - component: {fileID: 41620408}
   m_Layer: 0
   m_Name: Brain
   m_TagString: Untagged
@@ -151,7 +152,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_LocalScale: {x: 100, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -206,6 +207,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &41620408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 41620404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29ae2373b5ee644d0bbb5ad89c0ca08a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MaxHealth: 100
 --- !u!1 &1099687566
 GameObject:
   m_ObjectHideFlags: 0
@@ -257,7 +271,7 @@ MonoBehaviour:
   TombstonePrefab: {fileID: 2642404841601572931, guid: 2545f9884ff7b4bc8961473f630ead46, type: 3}
   RandomSeed: 100
   ZombiePrefab: {fileID: 2218445465952643876, guid: 1904f1cdd689c418a8cb6505c8926877, type: 3}
-  ZombieSpawnRate: 0.4
+  ZombieSpawnRate: 100
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

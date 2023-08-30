@@ -10,6 +10,8 @@ namespace Game.Scripts
         public float WalkSpeed;
         public float WalkAmplitude;
         public float WalkFrequency;
+        public float AttackDamage;
+        public float AttackInterval;
     }
 
     public class ZombieBaker : Baker<ZombieMono>
@@ -32,6 +34,15 @@ namespace Game.Scripts
 
             AddComponent(entity, new ZombieTimer());
             AddComponent(entity, new ZombieHeading());
+            AddComponent(entity, new ZombieMoveTag());
+
+            AddComponent(entity, new ZombieAttackComponent
+            {
+                AttackDamage = authoring.AttackDamage,
+                AttackInterval = authoring.AttackInterval
+            });
+
+            AddComponent(entity, new ZombieAttackTag());
         }
     }
 

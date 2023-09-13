@@ -8,6 +8,7 @@ using UnityEngine.Scripting;
 
 namespace Game.Scripts
 {
+    [DisableAutoCreation]
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial struct SpawnTombstoneSystem : ISystem
     {
@@ -29,7 +30,10 @@ namespace Game.Scripts
             var graveyardEntity = SystemAPI.GetSingletonEntity<GraveyardProperties>();
             var graveyardAspect = SystemAPI.GetAspect<GraveyardAspect>(graveyardEntity);
 
+            var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+
             var ecb = new EntityCommandBuffer(Allocator.Temp);
+            //var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
             //Job inc. //var ecb = new EntityCommandBuffer(Allocator.TempJob); 
 
             using var builder = new BlobBuilder(Allocator.Temp);

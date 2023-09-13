@@ -5,6 +5,8 @@ using Unity.Entities;
 namespace Game.Scripts
 {
     [BurstCompile]
+    [DisableAutoCreation]
+
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     [UpdateAfter(typeof(ZombieWalkSystem))]
     public partial struct ZombieAttackSystem : ISystem

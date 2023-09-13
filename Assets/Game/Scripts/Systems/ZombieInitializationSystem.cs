@@ -7,6 +7,8 @@ using Unity.Entities;
 namespace Game.Scripts
 {
     [BurstCompile]
+    [DisableAutoCreation]
+
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     [UpdateAfter(typeof(ZombieRiseSystem))]
     public partial struct ZombieInitializationSystem : ISystem

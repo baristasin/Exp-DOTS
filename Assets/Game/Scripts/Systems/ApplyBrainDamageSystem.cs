@@ -3,6 +3,7 @@ using Game.Scripts;
 using Unity.Burst;
 using Unity.Entities;
 
+[DisableAutoCreation]
 [UpdateInGroup(typeof(SimulationSystemGroup),OrderLast = true)]
 [UpdateAfter(typeof(EndSimulationEntityCommandBufferSystem))]
 public partial struct ApplyBrainDamageSystem : ISystem

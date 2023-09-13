@@ -4,6 +4,7 @@ using Unity.Entities;
 
 namespace Game.Scripts
 {
+    [DisableAutoCreation]
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial struct SpawnZombieSystem : ISystem
     {
@@ -23,7 +24,7 @@ namespace Game.Scripts
         public void OnUpdate(ref SystemState state)
         {
             var deltaTime = SystemAPI.Time.DeltaTime;
-            var ecbSingleton = SystemAPI.GetSingleton<BeginInitializationEntityCommandBufferSystem.Singleton>();
+            var ecbSingleton = SystemAPI.GetSingleton<BeginInitializationEntityCommandBufferSystem.Singleton>();            
 
             new SpawnZombieJob
             {

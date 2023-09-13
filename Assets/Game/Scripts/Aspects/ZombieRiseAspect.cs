@@ -13,10 +13,9 @@ namespace Game.Scripts
 
         private readonly RefRO<ZombieRiseRate> _zombieRiseRate;
 
-
         public void Rise(float deltaTime)
         {
-            _transform.ValueRW.Position += math.up() * _zombieRiseRate.ValueRO.RiseRate * deltaTime;
+            _transform.ValueRW.Position += math.up() * 3f * deltaTime;
         }
 
         public bool IsAboveGround => _transform.ValueRO.Position.y >= 3f;

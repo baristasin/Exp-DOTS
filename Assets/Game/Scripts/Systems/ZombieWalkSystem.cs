@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace Game.Scripts
 {
+    [DisableAutoCreation]
     [BurstCompile]
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     [UpdateAfter(typeof(ZombieInitializationSystem))]
@@ -22,7 +23,6 @@ namespace Game.Scripts
         [BurstCompile]
         public void OnDestroy(ref SystemState state)
         {
-
         }
 
         [BurstCompile]
@@ -32,6 +32,22 @@ namespace Game.Scripts
             var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
             var brainEntity = SystemAPI.GetSingletonEntity<BrainTag>();
             var brainScale = SystemAPI.GetComponent<LocalTransform>(brainEntity).Scale;
+
+            //foreach(var aspect in SystemAPI.Query<ZombieWalkAspect>())
+            //{
+            //    aspect.Walk(deltaTime);
+            //    ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).SetComponentEnabled<ZombieWalkProperties>(aspect.Entity,false);
+            //}
+
+            //foreach (var aspect in SystemAPI.Query<ZombieWalkAspect, RefRW<ZombieMoveTag>>())
+            //{
+            //    new ZombieWalkJob
+            //    {
+            //        DeltaTime = deltaTime,
+            //        BrainRadiusSq = 3f,
+            //        EntityCommandBuffer = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter()
+            //    };
+            //}
 
             new ZombieWalkJob
             {
@@ -53,8 +69,8 @@ namespace Game.Scripts
                 zombieWalkAspect.Walk(DeltaTime);
                 if (zombieWalkAspect.IsInStoppingRange(float3.zero, BrainRadiusSq))
                 {
-                    EntityCommandBuffer.SetComponentEnabled<ZombieWalkProperties>(queryIndex,zombieWalkAspect.Entity, false);
-                    EntityCommandBuffer.SetComponentEnabled<ZombieAttackComponent>(queryIndex, zombieWalkAspect.Entity, true);                    
+                    EntityCommandBuffer.SetComponentEnabled<ZombieWalkProperties>(queryIndex, zombieWalkAspect.Entity, false);
+                    EntityCommandBuffer.SetComponentEnabled<ZombieAttackComponent>(queryIndex, zombieWalkAspect.Entity, true);
                 }
             }
         }

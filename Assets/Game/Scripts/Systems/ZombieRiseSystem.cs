@@ -6,6 +6,8 @@ using UnityEngine;
 namespace Game.Scripts
 {
     [BurstCompile]
+    [DisableAutoCreation]
+
     [UpdateAfter(typeof(SpawnZombieSystem))]
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial struct ZombieRiseSystem : ISystem

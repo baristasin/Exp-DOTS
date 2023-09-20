@@ -8,23 +8,56 @@ using UnityEngine;
 public readonly partial struct EnemyFieldAspect : IAspect
 {
     public readonly Entity Entity;
-    public readonly RefRO<EnemyFieldProperties> EnemyFieldProperties => _enemyFieldProperties;
     public readonly RefRW<EnemyFieldRandom> EnemyFieldRandom => _enemyFieldRandom;
+
+    public readonly RefRW<EnemyFieldPositionDatas> EnemyFieldPositionDatas => _enemyFieldPositionDatas;
+    public readonly RefRW<EnemyFieldEnemyPrefabsData> EnemyFieldEnemyPrefabsData => _enemyFieldEnemyPrefabsData;
+    public readonly RefRW<EnemyFieldSpawnDatas> EnemyFieldSpawnDatas => _enemyFieldSpawnDatas;
+
 
     private readonly RefRO<LocalTransform> _transform;
     private LocalTransform Transform => _transform.ValueRO;
 
-    private readonly RefRO<EnemyFieldProperties> _enemyFieldProperties;
+    private readonly RefRW<EnemyFieldPositionDatas> _enemyFieldPositionDatas;
+    private readonly RefRW<EnemyFieldEnemyPrefabsData> _enemyFieldEnemyPrefabsData;
+    private readonly RefRW<EnemyFieldSpawnDatas> _enemyFieldSpawnDatas;
+
     private readonly RefRW<EnemyFieldRandom> _enemyFieldRandom;
 
-    public LocalTransform GetRandomEnemyTransform()
+    public Entity GetRandomEnemy()
     {
-        var position = GetRandomPosition();
+        var randNum = _enemyFieldRandom.ValueRW.Value.NextInt(0, 3);
+
+        switch (randNum)
+        {
+            case 0:
+                {
+                    return _enemyFieldEnemyPrefabsData.ValueRO.CapsuleEnemyPrefab;                    
+                }
+            case 1:
+                {
+                    return _enemyFieldEnemyPrefabsData.ValueRO.CapsuleEnemyPrefab;
+                }
+            case 2:
+                {
+                    return _enemyFieldEnemyPrefabsData.ValueRO.CapsuleEnemyPrefab;
+                }
+            default:
+                return _enemyFieldEnemyPrefabsData.ValueRO.CubeEnemyPrefab;
+        }
+    }
+
+    public LocalTransform GetEnemyTransform(int instantiateIndex)
+    {
+        var spaceBetweenenemies = _enemyFieldSpawnDatas.ValueRO.WaveEnemyCount * 1.4f;
+
+        var pos = new float3((1.4f * instantiateIndex) - ((float)spaceBetweenenemies / 2f), 0.5f, _transform.ValueRO.Position.z + 20f);
 
         return new LocalTransform
         {
-            Position = position,
-            Rotation = quaternion.RotateY(RotateTowards(position,Transform.Position)),
+            Position = pos,
+            Rotation = quaternion.RotateY(RotateTowards(pos, pos)),
+            //Rotation = quaternion.Euler(new float3(0,0,0)),
             Scale = 1f
         };
     }
@@ -45,25 +78,15 @@ public readonly partial struct EnemyFieldAspect : IAspect
         {
             randomPosition = new float3
             {
-                x = _enemyFieldRandom.ValueRW.Value.NextFloat(-_enemyFieldProperties.ValueRO.FieldDimensions.x / 2,
-                    _enemyFieldProperties.ValueRO.FieldDimensions.x / 2),
+                x = _enemyFieldRandom.ValueRW.Value.NextFloat(-_enemyFieldPositionDatas.ValueRO.FieldDimensions.x / 2,
+                    _enemyFieldPositionDatas.ValueRO.FieldDimensions.x / 2),
                 y = 0.5f,
-                z = _enemyFieldRandom.ValueRW.Value.NextFloat(-_enemyFieldProperties.ValueRO.FieldDimensions.y / 2,
-                    _enemyFieldProperties.ValueRO.FieldDimensions.y / 2)
+                z = _enemyFieldRandom.ValueRW.Value.NextFloat(-_enemyFieldPositionDatas.ValueRO.FieldDimensions.y / 2,
+                0)
             };
-        } while (math.distancesq(Transform.Position, randomPosition) <= 50);
+        } while (math.distancesq(Transform.Position, randomPosition) <= 600);
 
         return randomPosition;
-    }
-
-    private quaternion GetRandomRotation()
-    {
-        return quaternion.RotateY(_enemyFieldRandom.ValueRW.Value.NextFloat(-0.25f, 0.25f));
-    }
-
-    private float GetRandomScale(float baseNumber)
-    {
-        return _enemyFieldRandom.ValueRW.Value.NextFloat(baseNumber, 1f);
     }
 }
 

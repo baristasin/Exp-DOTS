@@ -40,6 +40,7 @@ public partial struct EnemySpawnSystem : ISystem
 
                 var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
                 var chosenEnemy = ecb.Instantiate(enemyFieldAspect.GetRandomEnemy());
+                ecb.SetComponentEnabled<EnemyDeadTag>(chosenEnemy, false);
                 var randomTransform = enemyFieldAspect.GetEnemyTransform(enemyFieldAspect.EnemyFieldSpawnDatas.ValueRO.CurrentWaveEnemyCount);
 
                 ecb.AddComponent(chosenEnemy, randomTransform);

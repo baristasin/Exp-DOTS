@@ -64,8 +64,12 @@ public partial struct BulletMoveSystem : ISystem
                 {
                     //ecb.DestroyEntity(enemyEntity);
                     ecb.DestroyEntity(bulletEntity);
-                    ecb.AddComponent<EnemyDeadTag>(enemyEntity);
-                    ecb.RemoveComponent<EnemyMovementData>(enemyEntity);
+                    ecb.SetComponentEnabled<EnemyMovementData>(enemyEntity,false);
+                    ecb.SetComponent<EnemyDeadTag>(enemyEntity, new EnemyDeadTag
+                    {
+                        HitDirection = math.normalize(enemyXZ - minigunBulletXZ)
+                    });
+                    ecb.SetComponentEnabled<EnemyDeadTag>(enemyEntity,true);
                     enemyFieldAspect.EnemyFieldSpawnDatas.ValueRW.CurrentEnemyCount -= 1;
                     break;
                 }

@@ -51,7 +51,7 @@ public readonly partial struct EnemyFieldAspect : IAspect
     {
         var spaceBetweenenemies = _enemyFieldSpawnDatas.ValueRO.WaveEnemyCount * 1.4f;
 
-        var pos = new float3((1.4f * instantiateIndex) - ((float)spaceBetweenenemies / 2f), 0.5f, _transform.ValueRO.Position.z + 50f);
+        var pos = new float3((1.4f * instantiateIndex) - ((float)spaceBetweenenemies / 2f), 1.5f, _transform.ValueRO.Position.z + 50f);
 
         float forwardStepValue = instantiateIndex % 2 == 0 ? 1f : 0;
 

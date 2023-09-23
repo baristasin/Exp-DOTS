@@ -14,6 +14,8 @@ public class EnemyBaker : Baker<EnemyMono>
         Entity entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
 
         AddComponent(entity, new EnemyMovementData { MoveSpeed = authoring.MovementSpeed });
+
+        AddComponent(entity, new EnemyDeadTag());
     }
 }
 

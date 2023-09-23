@@ -8,8 +8,6 @@ using UnityEngine;
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 public partial struct GunShootingSystem : ISystem
 {
-    public int Counter;
-
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
@@ -31,11 +29,8 @@ public partial struct GunShootingSystem : ISystem
         new ShootingJob
         {
             DeltaTime = deltaTime,
-            Counter = Counter,
             ParallelEntityCommandBuffer = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter()
         }.ScheduleParallel();
-
-        Counter++;
     }
 }
 
@@ -43,7 +38,6 @@ public partial struct GunShootingSystem : ISystem
 public partial struct ShootingJob : IJobEntity
 {
     public EntityCommandBuffer.ParallelWriter ParallelEntityCommandBuffer;
-    public int Counter;
     public float DeltaTime;
 
     public void Execute(GunAspect gunAspect, [EntityIndexInQuery] int queryIndex)
@@ -53,13 +47,11 @@ public partial struct ShootingJob : IJobEntity
             gunAspect.CurrentTimerValue = gunAspect.ShootInterval;
             var bulletEntity = ParallelEntityCommandBuffer.Instantiate(queryIndex, gunAspect.GunBulletEntity);
 
-            var value = math.sin(Counter*100f);
-
             LocalTransform newTransform = new LocalTransform
             {
-                Position = new float3(0, 1f, 0),
-                Rotation = quaternion.Euler(0,value / 2f, 0),
-                Scale = 1f
+                Position = gunAspect.LocalTransform.ValueRO.Position + gunAspect.LocalTransform.ValueRO.Forward(),
+                Rotation = gunAspect.LocalTransform.ValueRO.Rotation,
+                Scale = 0.2f
             };
 
             ParallelEntityCommandBuffer.SetComponent(queryIndex,bulletEntity, newTransform);
@@ -68,8 +60,10 @@ public partial struct ShootingJob : IJobEntity
             {
                 case GunType.Minigun:
                     {
-                        MinigunBullet minigunBullet = new MinigunBullet { BulletSpeed = 10f,MaxLifeTimeValue = 4f };
+                        MinigunBullet minigunBullet = new MinigunBullet { LifeTimeValue = 2f };
+                        MinigunBulletSpeedData minigunBulletSpeedData = new MinigunBulletSpeedData { BulletSpeed = 50f };
                         ParallelEntityCommandBuffer.AddComponent(queryIndex, bulletEntity,minigunBullet);
+                        ParallelEntityCommandBuffer.AddSharedComponent(queryIndex, bulletEntity, minigunBulletSpeedData);
                         break;
                     }
                 case GunType.RocketLauncher:

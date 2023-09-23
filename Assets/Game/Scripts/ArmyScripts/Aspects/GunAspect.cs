@@ -1,5 +1,6 @@
 ﻿using System;
 using Unity.Entities;
+using Unity.Transforms;
 using UnityEngine;
 
 public readonly partial struct GunAspect : IAspect
@@ -8,6 +9,7 @@ public readonly partial struct GunAspect : IAspect
 
     public readonly RefRO<GunData> GunData => _gunData;
     public readonly RefRW<GunTimer> GunTimer => _gunTimer;
+    public readonly RefRO<LocalTransform> LocalTransform => _localTransform;
     public readonly Entity GunBulletEntity => _gunData.ValueRO.GunBulletPrefab;
 
     public float CurrentTimerValue
@@ -20,6 +22,7 @@ public readonly partial struct GunAspect : IAspect
               
     private readonly RefRO<GunData> _gunData;
     private readonly RefRW<GunTimer> _gunTimer;
+    private readonly RefRO<LocalTransform> _localTransform;
 
 }
 

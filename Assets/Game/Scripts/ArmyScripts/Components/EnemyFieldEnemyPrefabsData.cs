@@ -7,5 +7,7 @@ public struct EnemyFieldEnemyPrefabsData : IComponentData
     public Entity CubeEnemyPrefab;
     public Entity CapsuleEnemyPrefab;
     public Entity SphereEnemyPrefab;
+
+    public Entity MinigunPrefab;
 }
 

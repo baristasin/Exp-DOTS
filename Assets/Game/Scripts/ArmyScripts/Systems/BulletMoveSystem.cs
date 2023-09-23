@@ -24,42 +24,74 @@ public partial struct BulletMoveSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        var ecbSingleton = SystemAPI.GetSingleton<BeginPresentationEntityCommandBufferSystem.Singleton>();
+
         var enemyFieldEntity = SystemAPI.GetSingletonEntity<EnemyFieldSpawnDatas>();
         var enemyFieldAspect = SystemAPI.GetAspect<EnemyFieldAspect>(enemyFieldEntity);
 
         var deltaTime = SystemAPI.Time.DeltaTime;
 
-        var ecb = new EntityCommandBuffer(Allocator.Temp);
+        var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-        foreach (var (minigunBulletTransform,minigunBullet,bulletEntity) in SystemAPI.Query<RefRW<LocalTransform>,RefRW<MinigunBullet>>().WithEntityAccess())
+        //PARALLELIZE THIS
+
+        //new BulletMoveJob
+        //{
+        //    DeltaTime = deltaTime,
+        //    EntityCommandBuffer = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter()
+        //}.ScheduleParallel();
+
+        //Move minigun bullet, if lifetime passed, kill it.
+        foreach (var (minigunBulletTransform, minigunBullet, bulletEntity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<MinigunBullet>>().WithEntityAccess())
         {
-            minigunBulletTransform.ValueRW.Position += minigunBulletTransform.ValueRO.Forward() * (minigunBullet.ValueRO.BulletSpeed * deltaTime);
+            minigunBulletTransform.ValueRW.Position += minigunBulletTransform.ValueRO.Forward() * (state.EntityManager.GetSharedComponent<MinigunBulletSpeedData>(bulletEntity).BulletSpeed * deltaTime);
 
-            minigunBullet.ValueRW.CurrentLifeTimeValue += deltaTime;
+            minigunBullet.ValueRW.LifeTimeValue -= deltaTime;
 
-            if(minigunBullet.ValueRO.CurrentLifeTimeValue >= minigunBullet.ValueRO.MaxLifeTimeValue)
+            if (minigunBullet.ValueRO.LifeTimeValue <= 0)
             {
                 ecb.DestroyEntity(bulletEntity);
                 break;
             }
 
-            foreach(var (enemyTransform,enemyMovement,enemyEntity) in SystemAPI.Query<RefRO<LocalTransform>,RefRO<EnemyMovementData>>().WithEntityAccess())
+            // if minigun and enemy fake collides, kill both
+            foreach (var (enemyTransform, enemyMovement, enemyEntity) in SystemAPI.Query<RefRO<LocalTransform>, RefRO<EnemyMovementData>>().WithEntityAccess().WithNone<EnemyDeadTag>())
             {
                 var minigunBulletXZ = new float2(minigunBulletTransform.ValueRO.Position.x, minigunBulletTransform.ValueRO.Position.z);
                 var enemyXZ = new float2(enemyTransform.ValueRO.Position.x, enemyTransform.ValueRO.Position.z);
 
                 if (math.distance(minigunBulletXZ, enemyXZ) < 1f)
                 {
-                    ecb.DestroyEntity(enemyEntity);
+                    //ecb.DestroyEntity(enemyEntity);
                     ecb.DestroyEntity(bulletEntity);
+                    ecb.AddComponent<EnemyDeadTag>(enemyEntity);
+                    ecb.RemoveComponent<EnemyMovementData>(enemyEntity);
                     enemyFieldAspect.EnemyFieldSpawnDatas.ValueRW.CurrentEnemyCount -= 1;
                     break;
                 }
             }
         }
-
-        ecb.Playback(state.EntityManager);
     }
 }
+
+//public partial struct BulletMoveJob : IJobEntity
+//{
+//    public EntityCommandBuffer.ParallelWriter EntityCommandBuffer;
+//    public float DeltaTime;
+
+//    public void Execute(MinigunBulletAspect minigunBulletAspect, [EntityIndexInQuery] int queryIndex)
+//    {
+//        minigunBulletAspect.LocalTransform.ValueRW.Position += minigunBulletAspect.LocalTransform.ValueRO.Forward()
+//            * 50f * DeltaTime;
+
+//        minigunBulletAspect.MinigunBullet.ValueRW.LifeTimeValue -= DeltaTime;
+
+//        if (minigunBulletAspect.MinigunBullet.ValueRW.LifeTimeValue <= 0)
+//        {
+//            EntityCommandBuffer.DestroyEntity(queryIndex,minigunBulletAspect.Entity);
+//            return;
+//        }
+//    }
+//}
 
 

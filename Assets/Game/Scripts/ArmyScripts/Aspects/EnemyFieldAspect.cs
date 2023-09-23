@@ -51,11 +51,13 @@ public readonly partial struct EnemyFieldAspect : IAspect
     {
         var spaceBetweenenemies = _enemyFieldSpawnDatas.ValueRO.WaveEnemyCount * 1.4f;
 
-        var pos = new float3((1.4f * instantiateIndex) - ((float)spaceBetweenenemies / 2f), 0.5f, _transform.ValueRO.Position.z + 20f);
+        var pos = new float3((1.4f * instantiateIndex) - ((float)spaceBetweenenemies / 2f), 0.5f, _transform.ValueRO.Position.z + 50f);
+
+        float forwardStepValue = instantiateIndex % 2 == 0 ? 1f : 0;
 
         return new LocalTransform
         {
-            Position = pos,
+            Position = new float3(pos.x,pos.y,pos.z),
             Rotation = quaternion.RotateY(RotateTowards(pos, pos)),
             //Rotation = quaternion.Euler(new float3(0,0,0)),
             Scale = 1f

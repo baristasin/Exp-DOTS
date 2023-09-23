@@ -31,10 +31,11 @@ public partial struct EnemyMovementSystem : ISystem
         new EnemyMovementJob
         {
             DeltaTime = deltaTime
-        }.Schedule();
+        }.ScheduleParallel();
     }
 }
 
+[BurstCompile]
 public partial struct EnemyMovementJob : IJobEntity
 {
     public float DeltaTime;

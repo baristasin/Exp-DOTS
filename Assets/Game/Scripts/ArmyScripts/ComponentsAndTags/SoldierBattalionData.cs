@@ -1,0 +1,6 @@
+using Unity.Entities;
+
+public struct SoldierBattalionData : ISharedComponentData
+{
+    public byte BattalionId;
+}

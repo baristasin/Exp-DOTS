@@ -23,16 +23,10 @@ public partial struct UnitCircleAlignmentSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         var deltaTime = SystemAPI.Time.DeltaTime;
-        var unitCirclePropertiesEntity = SystemAPI.GetSingletonEntity<UnitCirclePropertiesData>();
-        var unitCircleAspect = SystemAPI.GetAspect<UnitCirclePropertiesAspect>(unitCirclePropertiesEntity);
 
-        if (unitCircleAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount > 0 && Input.GetMouseButton(0)) // selected soldier count > 0 this means there are
-                                                                                                                    //unit circles (not a good prediction), so if input on, we can align their positions
+        foreach (var unitCircleTransform in SystemAPI.Query<RefRW<LocalTransform>>().WithAll<UnitCircleData>())
         {
-            foreach (var unitCircleTransform in SystemAPI.Query<RefRW<LocalTransform>>().WithAll<UnitCircleData>())
-            {
-                unitCircleTransform.ValueRW.Position += new float3(0, 0, 1f) * deltaTime;
-            }
+            unitCircleTransform.ValueRW.Position += new float3(0, 0, 1f) * deltaTime;
         }
     }
 

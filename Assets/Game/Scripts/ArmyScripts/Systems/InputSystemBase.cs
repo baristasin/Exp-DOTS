@@ -14,12 +14,9 @@ public partial class InputSystemBase : SystemBase
     protected override void OnCreate()
     {
         _mainCamera = Camera.main;
-        var ecb = new EntityCommandBuffer(Allocator.Temp);
-        var inputEntity = ecb.CreateEntity();
-        ecb.AddComponent(inputEntity, new InputData());
+        var inputEntity = EntityManager.CreateEntity();
+        EntityManager.AddComponent(inputEntity, typeof(InputData));
         RequireForUpdate<InputData>();
-
-        ecb.Playback(EntityManager);
         base.OnCreate();
     }
 

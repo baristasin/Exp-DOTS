@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Entities.UniversalDelegates;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -11,10 +12,14 @@ public partial struct UnitCirclePlacementSystem : ISystem
 {
     public int IsCircleUnitsInstantiated;
 
+    private EntityQuery _unitCircleQuery;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<UnitCirclePropertiesData>();
+
+        _unitCircleQuery = new EntityQueryBuilder(state.WorldUpdateAllocator).WithAll<UnitCircleData>().WithAll<LocalTransform>().Build(ref state);
     }
 
     [BurstCompile]
@@ -32,17 +37,15 @@ public partial struct UnitCirclePlacementSystem : ISystem
         if (unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount <= 0
             && IsCircleUnitsInstantiated == 1) // if chosen soldier count = 0 and there are circleunits instantiated, clear all
         {
-            // Destroy all CircleUnits
-            // IsCircleUnitsInstantiated = 0
-            var ecb = new EntityCommandBuffer(Allocator.Temp);
+            var ecbSingleton = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
+            var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-            foreach (var (unitCircleData, unitCircleEntity) in SystemAPI.Query<RefRO<UnitCircleData>>().WithEntityAccess())
+            new DestroyAllUnitCirclesJob
             {
-                ecb.DestroyEntity(unitCircleEntity);
-            }
+                ecb = ecb
+            }.Schedule(_unitCircleQuery);
 
             IsCircleUnitsInstantiated = 0;
-            ecb.Playback(state.EntityManager);
         }
         else // selected count > 0 and circles not instantiated
         {
@@ -51,55 +54,98 @@ public partial struct UnitCirclePlacementSystem : ISystem
                 var inputDataEntity = SystemAPI.GetSingletonEntity<InputData>();
                 var inputData = SystemAPI.GetComponent<InputData>(inputDataEntity);
 
-                Debug.Log($"start: {inputData.GroundInputStartingPos}, current: {inputData.GroundInputPos}");
-
                 if (math.distance(inputData.GroundInputStartingPos, inputData.GroundInputPos) > 3f)
                 {
-                    var ecb = new EntityCommandBuffer(Allocator.Temp);
+                    var ecbSingleton = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
+                    var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
                     for (int i = 0; i < unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount; i++)
                     {
-                        var unitCircleEntity = ecb.Instantiate(unitCirclePropsAspect.UnitCircleEntity);
-
-                        LocalTransform localTransform = new LocalTransform
+                        new CreateUnitCirclesJob
                         {
-                            Position = new float3(i, 0.5f, 0),
-                            Rotation = quaternion.identity,
-                            Scale = 1f
-                        };
-
-                        ecb.AddComponent(unitCircleEntity, localTransform);
+                            Counter = i,
+                            UnitCircleEntity = unitCirclePropsAspect.UnitCircleEntity,
+                            ecb = ecb
+                        }.Schedule();
                     }
-                    IsCircleUnitsInstantiated = 1;
 
-                    ecb.Playback(state.EntityManager);
+                    IsCircleUnitsInstantiated = 1;
                 }
             }
         }
 
         if (Input.GetMouseButtonUp(0)) // mouse up, clear all again
         {
-            var ecb = new EntityCommandBuffer(Allocator.Temp);
+            var ecbSingleton = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
+            var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-            foreach (var (unitCircleData, unitCircleTransform) in SystemAPI.Query<RefRO<UnitCircleData>, RefRW<LocalTransform>>())
+            //foreach (var (unitCircleData, unitCircleTransform) in SystemAPI.Query<RefRO<UnitCircleData>, RefRW<LocalTransform>>())
+            //{
+            //    ecb.AppendToBuffer(unitCirclePropertiesEntity, new UnitCirclePlacementBufferElementData
+            //    {
+            //        UnitCirclePosXZ = new float2(unitCircleTransform.ValueRO.Position.x, unitCircleTransform.ValueRO.Position.z),
+            //    });
+            //}
+
+            new AddUnitCirclesToGeneralBufferJob
             {
-                ecb.AppendToBuffer(unitCirclePropertiesEntity, new UnitCirclePlacementBufferElementData
-                {
-                    UnitCirclePosXZ = new float2(unitCircleTransform.ValueRO.Position.x, unitCircleTransform.ValueRO.Position.z),
-                });
-            }
+                UnitCirclePropertiesEntity = unitCirclePropertiesEntity,
+                Ecb = ecb
+            }.Schedule(_unitCircleQuery);
 
-            // Destroy all CircleUnits
-            // IsCircleUnitsInstantiated = 0
-
-            foreach (var (unitCircleData, unitCircleEntity) in SystemAPI.Query<RefRO<UnitCircleData>>().WithEntityAccess())
+            new DestroyAllUnitCirclesJob
             {
-                ecb.DestroyEntity(unitCircleEntity);
-            }
+                ecb = ecb
+            }.Schedule(_unitCircleQuery);
 
             IsCircleUnitsInstantiated = 0;
-            ecb.Playback(state.EntityManager);
         }
 
+    }
+}
+
+public partial struct DestroyAllUnitCirclesJob : IJobEntity
+{
+    public EntityCommandBuffer ecb;
+
+    public void Execute(Entity entity)
+    {
+        ecb.DestroyEntity(entity);
+    }
+}
+
+public partial struct CreateUnitCirclesJob : IJobEntity
+{
+    public Entity UnitCircleEntity;
+    public int Counter;
+    public EntityCommandBuffer ecb;
+
+    public void Execute()
+    {
+        var unitCircleEntity = ecb.Instantiate(UnitCircleEntity);
+
+        LocalTransform localTransform = new LocalTransform
+        {
+            Position = new float3(Counter, 0.5f, 0),
+            Rotation = quaternion.identity,
+            Scale = 1f
+        };
+
+        ecb.AddComponent(unitCircleEntity, localTransform);
+    }
+
+}
+
+public partial struct AddUnitCirclesToGeneralBufferJob : IJobEntity
+{
+    public Entity UnitCirclePropertiesEntity;
+    public EntityCommandBuffer Ecb;
+
+    public void Execute(Entity entity,LocalTransform localTransform)
+    {
+        //Ecb.AppendToBuffer<UnitCirclePlacementBufferElementData>(UnitCirclePropertiesEntity, new UnitCirclePlacementBufferElementData
+        //{
+        //    UnitCirclePosXZ = new float2(unitCircleTransform.Position.x, unitCircleTransform.Position.z),
+        //});
     }
 }

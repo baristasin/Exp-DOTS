@@ -11,6 +11,7 @@ using UnityEngine;
 
 public partial struct PlayerAnimationSystem : ISystem
 {
+    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var ecb = new EntityCommandBuffer(Allocator.Temp);

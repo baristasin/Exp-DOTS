@@ -4,6 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+//[DisableAutoCreation]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public partial struct SoldierCreationSystem : ISystem
 {

@@ -6,7 +6,6 @@ using Unity.Transforms;
 using UnityEngine;
 
 [DisableAutoCreation]
-
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 [UpdateAfter(typeof(GunShootingSystem))]
 public partial struct BulletMoveSystem : ISystem
@@ -14,7 +13,7 @@ public partial struct BulletMoveSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-
+        state.RequireForUpdate<EnemyFieldSpawnDatas>();
     }
 
     [BurstCompile]

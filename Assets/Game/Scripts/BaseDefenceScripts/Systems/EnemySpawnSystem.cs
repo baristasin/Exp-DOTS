@@ -3,8 +3,6 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 [DisableAutoCreation]
-
-//[DisableAutoCreation]
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 public partial struct EnemySpawnSystem : ISystem
 {

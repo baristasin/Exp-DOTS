@@ -6,7 +6,6 @@ using Unity.Transforms;
 using UnityEngine;
 
 [DisableAutoCreation]
-
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 public partial struct GunShootingSystem : ISystem
 {

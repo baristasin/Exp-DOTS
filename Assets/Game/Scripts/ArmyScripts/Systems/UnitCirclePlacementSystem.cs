@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
+//[DisableAutoCreation]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public partial struct UnitCirclePlacementSystem : ISystem
 {
@@ -29,7 +30,7 @@ public partial struct UnitCirclePlacementSystem : ISystem
         var unitCirclePropsAspect = SystemAPI.GetAspect<UnitCirclePropertiesAspect>(unitCirclePropertiesEntity);
 
         if (unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount <= 0
-            && IsCircleUnitsInstantiated == 1)
+            && IsCircleUnitsInstantiated == 1) // if chosen soldier count = 0 and there are circleunits instantiated, clear all
         {
             // Destroy all CircleUnits
             // IsCircleUnitsInstantiated = 0
@@ -43,32 +44,40 @@ public partial struct UnitCirclePlacementSystem : ISystem
             IsCircleUnitsInstantiated = 0;
             ecb.Playback(state.EntityManager);
         }
-        else
+        else // selected count > 0 and circles not instantiated
         {
-            if (Input.GetMouseButtonDown(0) && IsCircleUnitsInstantiated == 0)
+            if (Input.GetMouseButton(0) && IsCircleUnitsInstantiated == 0)
             {
-                var ecb = new EntityCommandBuffer(Allocator.Temp);
+                var inputDataEntity = SystemAPI.GetSingletonEntity<InputData>();
+                var inputData = SystemAPI.GetComponent<InputData>(inputDataEntity);
 
-                for (int i = 0; i < unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount; i++)
+                Debug.Log($"start: {inputData.GroundInputStartingPos}, current: {inputData.GroundInputPos}");
+
+                if (math.distance(inputData.GroundInputStartingPos, inputData.GroundInputPos) > 3f)
                 {
-                    var unitCircleEntity = ecb.Instantiate(unitCirclePropsAspect.UnitCircleEntity);
+                    var ecb = new EntityCommandBuffer(Allocator.Temp);
 
-                    LocalTransform localTransform = new LocalTransform
+                    for (int i = 0; i < unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount; i++)
                     {
-                        Position = new float3(i, 0.5f, 0),
-                        Rotation = quaternion.identity,
-                        Scale = 1f
-                    };
+                        var unitCircleEntity = ecb.Instantiate(unitCirclePropsAspect.UnitCircleEntity);
 
-                    ecb.AddComponent(unitCircleEntity, localTransform);
+                        LocalTransform localTransform = new LocalTransform
+                        {
+                            Position = new float3(i, 0.5f, 0),
+                            Rotation = quaternion.identity,
+                            Scale = 1f
+                        };
+
+                        ecb.AddComponent(unitCircleEntity, localTransform);
+                    }
+                    IsCircleUnitsInstantiated = 1;
+
+                    ecb.Playback(state.EntityManager);
                 }
-                IsCircleUnitsInstantiated = 1;
-
-                ecb.Playback(state.EntityManager);
             }
         }
 
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0)) // mouse up, clear all again
         {
             var ecb = new EntityCommandBuffer(Allocator.Temp);
 

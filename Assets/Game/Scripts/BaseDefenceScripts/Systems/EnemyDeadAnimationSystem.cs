@@ -6,8 +6,6 @@ using Unity.Transforms;
 using UnityEngine;
 
 [DisableAutoCreation]
-
-//[DisableAutoCreation]
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 [UpdateAfter(typeof(EnemySpawnSystem))]
 

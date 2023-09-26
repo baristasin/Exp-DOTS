@@ -133,7 +133,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -1891627238288276181, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: GunShootInterval
-      value: 0.02
+      value: 0.04
       objectReference: {fileID: 0}
     - target: {fileID: 6412617191925608916, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: m_Name
@@ -194,7 +194,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -1891627238288276181, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: GunShootInterval
-      value: 0.02
+      value: 0.04
       objectReference: {fileID: 0}
     - target: {fileID: 6412617191925608916, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: m_Name
@@ -255,7 +255,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -1891627238288276181, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: GunShootInterval
-      value: 0.02
+      value: 0.04
       objectReference: {fileID: 0}
     - target: {fileID: 6412617191925608916, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: m_Name
@@ -399,7 +399,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -1891627238288276181, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: GunShootInterval
-      value: 0.02
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 6412617191925608916, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: m_Name
@@ -479,12 +479,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d0cee1e826bd4cc9a2f5924dbbe7ad0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SpawnInterval: 0.4
+  SpawnInterval: 0.3
   FieldDimensions:
     x: 150
     y: 150
-  WaveEnemyCount: 35
-  MaxEnemyCount: 1000
+  WaveEnemyCount: 20
+  MaxEnemyCount: 300
   RandomSeedValue: 100
   CubePrefab: {fileID: 4245866230545922246, guid: ec9eab6c2e3d842c9b3ad04be672402a, type: 3}
   CapsulePrefab: {fileID: 5828529432603614555, guid: 631facf1902f842f5967f26bfc609b23, type: 3}
@@ -515,7 +515,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -1891627238288276181, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: GunShootInterval
-      value: 0.02
+      value: 0.04
       objectReference: {fileID: 0}
     - target: {fileID: 6412617191925608916, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: m_Name

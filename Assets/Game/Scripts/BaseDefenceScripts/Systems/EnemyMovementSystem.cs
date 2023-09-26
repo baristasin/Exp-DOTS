@@ -3,8 +3,6 @@ using Unity.Entities;
 using Unity.Transforms;
 
 [DisableAutoCreation]
-
-//[DisableAutoCreation]
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 public partial struct EnemyMovementSystem : ISystem
 {

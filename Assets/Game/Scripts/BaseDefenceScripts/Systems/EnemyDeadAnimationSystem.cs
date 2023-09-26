@@ -23,7 +23,6 @@ public partial struct EnemyDeadAnimationSystem : ISystem
 
     }
 
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var deltaTime = SystemAPI.Time.DeltaTime;

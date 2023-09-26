@@ -2,6 +2,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Entities.UniversalDelegates;
+using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -43,7 +44,7 @@ public partial struct UnitCirclePlacementSystem : ISystem
             new DestroyAllUnitCirclesJob
             {
                 ecb = ecb
-            }.Schedule(_unitCircleQuery);
+            }.Schedule();
 
             IsCircleUnitsInstantiated = 0;
         }
@@ -51,6 +52,7 @@ public partial struct UnitCirclePlacementSystem : ISystem
         {
             if (Input.GetMouseButton(0) && IsCircleUnitsInstantiated == 0)
             {
+
                 var inputDataEntity = SystemAPI.GetSingletonEntity<InputData>();
                 var inputData = SystemAPI.GetComponent<InputData>(inputDataEntity);
 
@@ -61,15 +63,34 @@ public partial struct UnitCirclePlacementSystem : ISystem
 
                     for (int i = 0; i < unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount; i++)
                     {
-                        new CreateUnitCirclesJob
+                        var handle = new CreateUnitCirclesJob
                         {
                             Counter = i,
                             UnitCircleEntity = unitCirclePropsAspect.UnitCircleEntity,
                             ecb = ecb
                         }.Schedule();
+
+                        handle.Complete();
                     }
 
+
                     IsCircleUnitsInstantiated = 1;
+
+                    //for (int i = 0; i < unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount; i++)
+                    //{
+                    //    var unitCircleEntity = ecb.Instantiate(unitCirclePropsAspect.UnitCircleEntity);
+
+                    //    LocalTransform localTransform = new LocalTransform
+                    //    {
+                    //        Position = new float3(i, 0.5f, 0),
+                    //        Rotation = quaternion.identity,
+                    //        Scale = 1f
+                    //    };
+
+                    //    ecb.AddComponent(unitCircleEntity, localTransform);
+                    //}
+
+                    //IsCircleUnitsInstantiated = 1;
                 }
             }
         }
@@ -104,22 +125,14 @@ public partial struct UnitCirclePlacementSystem : ISystem
     }
 }
 
-public partial struct DestroyAllUnitCirclesJob : IJobEntity
-{
-    public EntityCommandBuffer ecb;
-
-    public void Execute(Entity entity)
-    {
-        ecb.DestroyEntity(entity);
-    }
-}
-
-public partial struct CreateUnitCirclesJob : IJobEntity
+[BurstCompile]
+public partial struct CreateUnitCirclesJob : IJob
 {
     public Entity UnitCircleEntity;
     public int Counter;
     public EntityCommandBuffer ecb;
 
+    [BurstCompile]
     public void Execute()
     {
         var unitCircleEntity = ecb.Instantiate(UnitCircleEntity);
@@ -136,16 +149,30 @@ public partial struct CreateUnitCirclesJob : IJobEntity
 
 }
 
+[BurstCompile]
+public partial struct DestroyAllUnitCirclesJob : IJobEntity
+{
+    public EntityCommandBuffer ecb;
+
+    [BurstCompile]
+    public void Execute(Entity entity)
+    {
+        ecb.DestroyEntity(entity);
+    }
+}
+
+[BurstCompile]
 public partial struct AddUnitCirclesToGeneralBufferJob : IJobEntity
 {
     public Entity UnitCirclePropertiesEntity;
     public EntityCommandBuffer Ecb;
 
-    public void Execute(Entity entity,LocalTransform localTransform)
+    [BurstCompile]
+    public void Execute(Entity entity, LocalTransform unitCircleTransform)
     {
-        //Ecb.AppendToBuffer<UnitCirclePlacementBufferElementData>(UnitCirclePropertiesEntity, new UnitCirclePlacementBufferElementData
-        //{
-        //    UnitCirclePosXZ = new float2(unitCircleTransform.Position.x, unitCircleTransform.Position.z),
-        //});
+        Ecb.AppendToBuffer<UnitCirclePlacementBufferElementData>(UnitCirclePropertiesEntity, new UnitCirclePlacementBufferElementData
+        {
+            UnitCirclePosXZ = new float2(unitCircleTransform.Position.x, unitCircleTransform.Position.z),
+        });
     }
 }

@@ -24,15 +24,20 @@ public partial struct UnitCircleAlignmentSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         var deltaTime = SystemAPI.Time.DeltaTime;
+
         int counter = 0;
+        int lineIndex = 0;
+        int lineMaximumSoldierCount = 10;
 
         foreach (var unitCircleTransform in SystemAPI.Query<RefRW<LocalTransform>>().WithAll<UnitCircleData>())
         {
             var inputDataEntity = SystemAPI.GetSingletonEntity<InputData>();
             var inputData = SystemAPI.GetComponent<InputData>(inputDataEntity);
 
-            var alignmentDirectionNormalized = math.normalize(inputData.GroundInputPos - inputData.GroundInputStartingPos);
+            var alignmentDirectionNormalized = math.normalize(inputData.GroundInputPos - inputData.GroundInputStartingPos) * 2f;
             float angleBetweenVectors = 0;
+
+            // Q1 - Determining facing direction, is user dragged to right or left, if right => they should look forward
             if (inputData.GroundInputPos.z <= inputData.GroundInputStartingPos.z)
             {
                 angleBetweenVectors = Vector3.Angle(Vector3.right, alignmentDirectionNormalized);
@@ -41,9 +46,46 @@ public partial struct UnitCircleAlignmentSystem : ISystem
             {
                 angleBetweenVectors = -1f * Vector3.Angle(Vector3.right, alignmentDirectionNormalized);
             }
+            // Q1 - Ends
 
+            // Q2 - Align formation via calculating drag distance
+            var distanceBetweenInputs = Vector3.Distance(inputData.GroundInputPos,inputData.GroundInputStartingPos);
+
+            if ((int)distanceBetweenInputs - 3 > 1)
+            {
+                lineMaximumSoldierCount = 10 + (((int)distanceBetweenInputs - 3));
+            }
+
+            if(distanceBetweenInputs - 3f <= -0.3f)
+            {
+                if(distanceBetweenInputs < 0.9f)
+                {
+                    distanceBetweenInputs = 0.9f;
+                }
+                lineMaximumSoldierCount = 10 - (10 - (int)(distanceBetweenInputs / 0.3f));
+            }
+
+            if (counter >= lineMaximumSoldierCount && counter % lineMaximumSoldierCount == 0)
+            {
+                counter = 0;
+                lineIndex++;
+            }
+
+            // Q2 - Ends
+
+            // Q3 - Counter determines soldier horizontal order
             unitCircleTransform.ValueRW.Position = inputData.GroundInputStartingPos + (counter * alignmentDirectionNormalized);
+            // Q3 - Ends
+
+            // Q4 - Line Index determines soldier vertical order
+            alignmentDirectionNormalized.x *= -1;
+            float3 rotated90DegreesVector = new float3(alignmentDirectionNormalized.z,0, alignmentDirectionNormalized.x);
+            unitCircleTransform.ValueRW.Position += rotated90DegreesVector * lineIndex;
+            // Q4 - Ends
+
+            // Q5 - Determines facing direction via calculating the angle direction vector and vector3 right
             unitCircleTransform.ValueRW.Rotation = quaternion.Euler(0, Mathf.Deg2Rad * angleBetweenVectors, 0);
+            // Q5 - Ends
             counter++;
         }
     }

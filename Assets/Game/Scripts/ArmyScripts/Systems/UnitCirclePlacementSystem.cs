@@ -110,7 +110,6 @@ public partial struct UnitCirclePlacementSystem : ISystem
 
             ecb.AddBuffer<UnitCirclePlacementBufferElementData>(unitCirclePropertiesEntity);
 
-
             new AddUnitCirclesToGeneralBufferJob
             {
                 UnitCirclePropertiesEntity = unitCirclePropertiesEntity,

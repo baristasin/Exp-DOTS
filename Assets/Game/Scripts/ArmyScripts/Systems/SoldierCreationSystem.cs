@@ -29,7 +29,7 @@ public partial struct SoldierCreationSystem : ISystem
 
         foreach (var soldierCreatorData in SystemAPI.Query<SoldierCreatorData>())
         {           
-            for (int i = 0; i < 25; i++)
+            for (int i = 0; i < 250; i++)
             {
                 var soldierEntity = ecb.Instantiate(soldierCreatorData.SoldierEntity);
 
@@ -39,6 +39,13 @@ public partial struct SoldierCreationSystem : ISystem
                     Rotation = quaternion.identity,
                     Scale = 1f
                 };
+
+                ecb.AddComponent(soldierEntity, new SoldierMovementData
+                {
+                    MovementSpeed = 6f,
+                    TargetPosition = soldierTransform.Position,
+                    TargetRotation = soldierTransform.Rotation
+                });
 
                 SoldierBattalionData soldierBattalionData = new SoldierBattalionData { BattalionId = 1,IsBattalionChosen = 1 };
 

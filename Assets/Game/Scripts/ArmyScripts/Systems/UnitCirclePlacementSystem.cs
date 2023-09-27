@@ -108,11 +108,14 @@ public partial struct UnitCirclePlacementSystem : ISystem
             //    });
             //}
 
+            ecb.AddBuffer<UnitCirclePlacementBufferElementData>(unitCirclePropertiesEntity);
+
+
             new AddUnitCirclesToGeneralBufferJob
             {
                 UnitCirclePropertiesEntity = unitCirclePropertiesEntity,
                 Ecb = ecb
-            }.Schedule(_unitCircleQuery);
+            }.Run(_unitCircleQuery);
 
             new DestroyAllUnitCirclesJob
             {
@@ -173,6 +176,7 @@ public partial struct AddUnitCirclesToGeneralBufferJob : IJobEntity
         Ecb.AppendToBuffer<UnitCirclePlacementBufferElementData>(UnitCirclePropertiesEntity, new UnitCirclePlacementBufferElementData
         {
             UnitCirclePosXZ = new float2(unitCircleTransform.Position.x, unitCircleTransform.Position.z),
+            UnitCircleRotation = unitCircleTransform.Rotation
         });
     }
 }

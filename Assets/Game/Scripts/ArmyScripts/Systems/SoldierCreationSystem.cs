@@ -35,12 +35,12 @@ public partial struct SoldierCreationSystem : ISystem
 
                 LocalTransform soldierTransform = new LocalTransform
                 {
-                    Position = new float3(0, 0, 0),
+                    Position = new float3(0, 1.5f, 0),
                     Rotation = quaternion.identity,
                     Scale = 1f
                 };
 
-                SoldierBattalionData soldierBattalionData = new SoldierBattalionData { BattalionId = 1 };
+                SoldierBattalionData soldierBattalionData = new SoldierBattalionData { BattalionId = 1,IsBattalionChosen = 1 };
 
                 ecb.AddComponent(soldierEntity, soldierTransform);
                 ecb.AddSharedComponent(soldierEntity, soldierBattalionData);

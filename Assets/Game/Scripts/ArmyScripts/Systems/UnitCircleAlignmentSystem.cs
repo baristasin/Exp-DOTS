@@ -9,7 +9,8 @@ using Unity.Transforms;
 using UnityEngine;
 
 //[DisableAutoCreation]
-[UpdateInGroup(typeof(SimulationSystemGroup))]
+[UpdateInGroup(typeof(InitializationSystemGroup))]
+[UpdateAfter(typeof(UnitCirclePlacementSystem))]
 public partial struct UnitCircleAlignmentSystem : ISystem
 {
     [BurstCompile]
@@ -23,12 +24,27 @@ public partial struct UnitCircleAlignmentSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         var deltaTime = SystemAPI.Time.DeltaTime;
+        int counter = 0;
 
         foreach (var unitCircleTransform in SystemAPI.Query<RefRW<LocalTransform>>().WithAll<UnitCircleData>())
         {
-            unitCircleTransform.ValueRW.Position += new float3(0, 0, 1f) * deltaTime;
+            var inputDataEntity = SystemAPI.GetSingletonEntity<InputData>();
+            var inputData = SystemAPI.GetComponent<InputData>(inputDataEntity);
+
+            var alignmentDirectionNormalized = math.normalize(inputData.GroundInputPos - inputData.GroundInputStartingPos);
+            float angleBetweenVectors = 0;
+            if (inputData.GroundInputPos.z <= inputData.GroundInputStartingPos.z)
+            {
+                angleBetweenVectors = Vector3.Angle(Vector3.right, alignmentDirectionNormalized);
+            }
+            else
+            {
+                angleBetweenVectors = -1f * Vector3.Angle(Vector3.right, alignmentDirectionNormalized);
+            }
+
+            unitCircleTransform.ValueRW.Position = inputData.GroundInputStartingPos + (counter * alignmentDirectionNormalized);
+            unitCircleTransform.ValueRW.Rotation = quaternion.Euler(0, Mathf.Deg2Rad * angleBetweenVectors, 0);
+            counter++;
         }
     }
-
-
 }

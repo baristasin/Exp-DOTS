@@ -21,6 +21,5 @@ public class UnitCirclePropertiesBaker : Baker<UnitCirclePropertiesMono>
             CurrentSelectedSoldierCount = authoring.ExampleSelectSoldierCount
         });
 
-        AddBuffer<UnitCirclePlacementBufferElementData>(entity);
     }
 }

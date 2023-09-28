@@ -14,6 +14,6 @@ public class InputDataBaker : Baker<InputDataMono>
     {
         Entity entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
 
-        AddComponent(entity, new InputData());
+        AddComponent(entity, new GroundInputData());
     }
 }

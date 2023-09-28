@@ -6,7 +6,7 @@ using UnityEngine;
 
 //[DisableAutoCreation]
 [UpdateInGroup(typeof(InitializationSystemGroup),OrderFirst = true)]
-public partial class InputSystemBase : SystemBase
+public partial class GroundInputSystemBase : SystemBase
 {
     private Camera _mainCamera;
     private CollisionWorld _collisionWorld;
@@ -14,15 +14,14 @@ public partial class InputSystemBase : SystemBase
     protected override void OnCreate()
     {
         _mainCamera = Camera.main;
-        var inputEntity = EntityManager.CreateEntity();
-        RequireForUpdate<InputData>();
+        RequireForUpdate<GroundInputData>();
         base.OnCreate();
     }
 
     protected override void OnUpdate()
     {
-        var inputDataSingleton = SystemAPI.GetSingletonEntity<InputData>();
-        var inputDataAspect = SystemAPI.GetAspect<InputAspect>(inputDataSingleton);
+        var inputDataSingleton = SystemAPI.GetSingletonEntity<GroundInputData>();
+        var inputDataAspect = SystemAPI.GetAspect<GroundInputAspect>(inputDataSingleton);
 
         if (Input.GetMouseButtonDown(1))
         {

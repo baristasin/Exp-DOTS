@@ -1,7 +1,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 
-public struct InputData : IComponentData
+public struct GroundInputData : IComponentData
 {
     public float3 GroundInputStartingPos;
     public float3 GroundInputPos;

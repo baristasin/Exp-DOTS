@@ -35,8 +35,8 @@ public partial struct UnitCirclePlacementSystem : ISystem
         var unitCirclePropertiesEntity = SystemAPI.GetSingletonEntity<UnitCirclePropertiesData>();
         var unitCirclePropsAspect = SystemAPI.GetAspect<UnitCirclePropertiesAspect>(unitCirclePropertiesEntity);
 
-        var inputDataEntity = SystemAPI.GetSingletonEntity<InputData>();
-        var inputDataAspect = SystemAPI.GetAspect<InputAspect>(inputDataEntity);
+        var inputDataEntity = SystemAPI.GetSingletonEntity<GroundInputData>();
+        var inputDataAspect = SystemAPI.GetAspect<GroundInputAspect>(inputDataEntity);
 
         if(inputDataAspect.InputData.ValueRO.IsDragging == 1) // Dragging
         {

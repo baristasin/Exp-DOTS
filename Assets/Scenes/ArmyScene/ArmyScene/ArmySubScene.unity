@@ -203,7 +203,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 100, y: 1, z: 100}
+  m_LocalScale: {x: 333.55, y: 1, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -411,7 +411,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 411344780}
-  - component: {fileID: 411344779}
+  - component: {fileID: 411344781}
   m_Layer: 0
   m_Name: SoldierCreator
   m_TagString: Untagged
@@ -419,19 +419,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &411344779
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 411344778}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c9ed23112b94433e890cd06b271f2b3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SoldierObject: {fileID: 3279124725788853812, guid: 282c942ff49cd489bbd9330c7f60f6d5, type: 3}
 --- !u!4 &411344780
 Transform:
   m_ObjectHideFlags: 0
@@ -447,6 +434,32 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &411344781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 411344778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c9ed23112b94433e890cd06b271f2b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SwordsmenObject: {fileID: 3279124725788853812, guid: 282c942ff49cd489bbd9330c7f60f6d5, type: 3}
+  ArcherObject: {fileID: 3279124725788853812, guid: f83e0fda1e5264a3783e8dd981bf7b06, type: 3}
+  KnightObject: {fileID: 3279124725788853812, guid: fde233b14fd244d319f80f87d5598832, type: 3}
+  SoldierCreatePropsDatas:
+  - SoldierType: 2
+    SoldierCount: 15
+  - SoldierType: 1
+    SoldierCount: 20
+  - SoldierType: 0
+    SoldierCount: 30
+  - SoldierType: 1
+    SoldierCount: 20
+  - SoldierType: 2
+    SoldierCount: 15
 --- !u!1 &645817302
 GameObject:
   m_ObjectHideFlags: 0
@@ -477,7 +490,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitCircleObject: {fileID: 8414154005003441462, guid: 05cc50ad63568454b899b26f7448f080, type: 3}
-  ExampleSelectSoldierCount: 250
 --- !u!4 &645817304
 Transform:
   m_ObjectHideFlags: 0
@@ -493,6 +505,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1525171677
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1525171679}
+  - component: {fileID: 1525171678}
+  m_Layer: 0
+  m_Name: InputDataMono
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1525171678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1525171677}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 654430fe9fcef434cb83ebc5b012c622, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1525171679
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1525171677}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 46.38, z: -37.49}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -500,3 +556,4 @@ SceneRoots:
   - {fileID: 411344780}
   - {fileID: 645817304}
   - {fileID: 247113710}
+  - {fileID: 1525171679}

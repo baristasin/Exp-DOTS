@@ -8,10 +8,13 @@ using Unity.Transforms;
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public partial struct SoldierCreationSystem : ISystem
 {
+    public BufferLookup<SoldierCreationBufferElementData> _soldierCreationBufferElementData;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        state.RequireForUpdate<SoldierCreatorData>();
+        state.RequireForUpdate<SoldierFactoryData>();
+        _soldierCreationBufferElementData = state.GetBufferLookup<SoldierCreationBufferElementData>();
     }
 
     [BurstCompile]
@@ -23,45 +26,77 @@ public partial struct SoldierCreationSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        var soldierCreatePropertiesEntity = SystemAPI.GetSingletonEntity<SoldierFactoryData>();
+        var soldierCreatePropertiesAspect = SystemAPI.GetAspect<SoldierCreatePropertiesAspect>(soldierCreatePropertiesEntity);
+
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
-        foreach (var soldierCreatorData in SystemAPI.Query<SoldierCreatorData>())
+        _soldierCreationBufferElementData.Update(ref state);
+
+        if (_soldierCreationBufferElementData.TryGetBuffer(soldierCreatePropertiesEntity, out var soldierCreatePropsBuffer))
         {
-            int counter = 10;
-            int lineIndex = soldierCreatorData.SoldierCount / 10;
 
-            for (int i = 0; i < soldierCreatorData.SoldierCount; i++)
+            for (int i = 0; i < soldierCreatePropsBuffer.Length; i++)
             {
-                if (counter <= 0)
+                var horizontalBattalionOffset = 20f * i;
+
+                int counter = 10;
+                int lineIndex = soldierCreatePropsBuffer[i].SoldierCount / 10;
+
+                for (int j = 0; j < soldierCreatePropsBuffer[i].SoldierCount; j++)
                 {
-                    counter = 10;
-                    lineIndex--;
+                    if (counter <= 0)
+                    {
+                        counter = 10;
+                        lineIndex--;
+                    }
+
+                    Entity createEntityType = soldierCreatePropertiesEntity;
+                    switch (soldierCreatePropsBuffer[i].SoldierType)
+                    {
+                        case SoldierType.Swordsmen:
+                            {
+                                createEntityType = soldierCreatePropertiesAspect.SoldierFactoryData.ValueRO.SwordsmenObject;
+                                break;
+                            }
+                        case SoldierType.Archer:
+                            {
+                                createEntityType = soldierCreatePropertiesAspect.SoldierFactoryData.ValueRO.ArcherObject;
+                                break;
+                            }
+                        case SoldierType.Knight:
+                            {
+                                createEntityType = soldierCreatePropertiesAspect.SoldierFactoryData.ValueRO.KnightObject;
+                                break;
+                            }
+                    }
+
+                    var soldierEntity = ecb.Instantiate(createEntityType);
+
+                    LocalTransform soldierTransform = new LocalTransform
+                    {
+                        Position = new float3(counter * 1.5f + horizontalBattalionOffset, 1.5f, -lineIndex * 1.5f),
+                        Rotation = quaternion.identity,
+                        Scale = 1f
+                    };
+
+                    ecb.AddComponent(soldierEntity, new SoldierMovementData
+                    {
+                        MovementSpeed = 15f,
+                        TargetPosition = soldierTransform.Position,
+                        TargetRotation = soldierTransform.Rotation
+                    });
+
+                    SoldierBattalionIdData soldierBattalionIdData = new SoldierBattalionIdData { BattalionId = i };
+                    SoldierBattalionIsChosenData soldierBattalionIsChosenData = new SoldierBattalionIsChosenData { IsBattalionChosen = 0 };
+
+                    ecb.AddComponent(soldierEntity, soldierTransform);
+                    ecb.AddSharedComponent(soldierEntity, soldierBattalionIdData);
+                    ecb.AddSharedComponent(soldierEntity, soldierBattalionIsChosenData);
+
+                    counter--;
                 }
-
-                var soldierEntity = ecb.Instantiate(soldierCreatorData.SoldierEntity);
-
-                LocalTransform soldierTransform = new LocalTransform
-                {
-                    Position = new float3(counter * 1.5f, 1.5f, -lineIndex * 1.5f),
-                    Rotation = quaternion.identity,
-                    Scale = 1f
-                };
-
-                ecb.AddComponent(soldierEntity, new SoldierMovementData
-                {
-                    MovementSpeed = 15f,
-                    TargetPosition = soldierTransform.Position,
-                    TargetRotation = soldierTransform.Rotation
-                });
-
-                SoldierBattalionData soldierBattalionData = new SoldierBattalionData { BattalionId = 1, IsBattalionChosen = 1 };
-
-                ecb.AddComponent(soldierEntity, soldierTransform);
-                ecb.AddSharedComponent(soldierEntity, soldierBattalionData);
-
-                counter--;
             }
-
         }
 
         ecb.Playback(state.EntityManager);

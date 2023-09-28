@@ -38,7 +38,7 @@ public partial struct SoldierMoveOrderSystem : ISystem
         if (unitCirclePropertiesAspect.UnitCirclePropData.ValueRO.IsBufferLoadedWithPositions == 1)
         {
             foreach (var (soldierTransform, soldierMovementData, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<SoldierMovementData>>()
-                .WithSharedComponentFilter(new SoldierBattalionData { BattalionId = 1, IsBattalionChosen = 1 }).WithEntityAccess())
+                .WithSharedComponentFilter(new SoldierBattalionIsChosenData { IsBattalionChosen = 1 }).WithEntityAccess())
             {
                 _unitCirclePlacementBufferLookUp.Update(ref state);
 
@@ -53,7 +53,10 @@ public partial struct SoldierMoveOrderSystem : ISystem
                 soldierMovementData.ValueRW.TargetRotation = unitCirclePlacementBufferForMove[counter].UnitCircleRotation;
 
                 counter++;
+
             }
+
+            Debug.Log(counter);
 
             unitCirclePropertiesAspect.UnitCirclePropData.ValueRW.IsBufferLoadedWithPositions = 0;
 

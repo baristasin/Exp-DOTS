@@ -17,7 +17,7 @@ public partial struct UnitCircleAlignmentSystem : ISystem
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<UnitCirclePropertiesData>();
-        state.RequireForUpdate<InputData>();
+        state.RequireForUpdate<GroundInputData>();
     }
 
     [BurstCompile]
@@ -29,8 +29,8 @@ public partial struct UnitCircleAlignmentSystem : ISystem
 
         foreach (var unitCircleTransform in SystemAPI.Query<RefRW<LocalTransform>>().WithAll<UnitCircleData>())
         {
-            var inputDataEntity = SystemAPI.GetSingletonEntity<InputData>();
-            var inputDataAspect = SystemAPI.GetAspect<InputAspect>(inputDataEntity);
+            var inputDataEntity = SystemAPI.GetSingletonEntity<GroundInputData>();
+            var inputDataAspect = SystemAPI.GetAspect<GroundInputAspect>(inputDataEntity);
 
             var alignmentDirectionNormalized = math.normalize(inputDataAspect.InputData.ValueRO.GroundInputPos - inputDataAspect.InputData.ValueRO.GroundInputStartingPos) * 2f;
             float angleBetweenVectors = 0;

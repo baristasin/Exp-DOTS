@@ -23,8 +23,6 @@ public partial struct UnitCircleAlignmentSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var deltaTime = SystemAPI.Time.DeltaTime;
-
         int counter = 0;
         int lineIndex = 0;
         int lineMaximumSoldierCount = 10;
@@ -32,13 +30,13 @@ public partial struct UnitCircleAlignmentSystem : ISystem
         foreach (var unitCircleTransform in SystemAPI.Query<RefRW<LocalTransform>>().WithAll<UnitCircleData>())
         {
             var inputDataEntity = SystemAPI.GetSingletonEntity<InputData>();
-            var inputData = SystemAPI.GetComponent<InputData>(inputDataEntity);
+            var inputDataAspect = SystemAPI.GetAspect<InputAspect>(inputDataEntity);
 
-            var alignmentDirectionNormalized = math.normalize(inputData.GroundInputPos - inputData.GroundInputStartingPos) * 2f;
+            var alignmentDirectionNormalized = math.normalize(inputDataAspect.InputData.ValueRO.GroundInputPos - inputDataAspect.InputData.ValueRO.GroundInputStartingPos) * 2f;
             float angleBetweenVectors = 0;
 
             // Q1 - Determining facing direction, is user dragged to right or left, if right => they should look forward
-            if (inputData.GroundInputPos.z <= inputData.GroundInputStartingPos.z)
+            if (inputDataAspect.InputData.ValueRO.GroundInputPos.z <= inputDataAspect.InputData.ValueRO.GroundInputStartingPos.z)
             {
                 angleBetweenVectors = Vector3.Angle(Vector3.right, alignmentDirectionNormalized);
             }
@@ -49,7 +47,7 @@ public partial struct UnitCircleAlignmentSystem : ISystem
             // Q1 - Ends
 
             // Q2 - Align formation via calculating drag distance
-            var distanceBetweenInputs = Vector3.Distance(inputData.GroundInputPos,inputData.GroundInputStartingPos);
+            var distanceBetweenInputs = Vector3.Distance(inputDataAspect.InputData.ValueRO.GroundInputPos, inputDataAspect.InputData.ValueRO.GroundInputStartingPos);
 
             if ((int)distanceBetweenInputs - 3 > 1)
             {
@@ -74,7 +72,7 @@ public partial struct UnitCircleAlignmentSystem : ISystem
             // Q2 - Ends
 
             // Q3 - Counter determines soldier horizontal order
-            unitCircleTransform.ValueRW.Position = inputData.GroundInputStartingPos + (counter * alignmentDirectionNormalized);
+            unitCircleTransform.ValueRW.Position = inputDataAspect.InputData.ValueRO.GroundInputStartingPos + (counter * alignmentDirectionNormalized);
             // Q3 - Ends
 
             // Q4 - Line Index determines soldier vertical order

@@ -6,5 +6,5 @@ public readonly partial struct UnitCirclePropertiesAspect : IAspect
 
     public readonly Entity UnitCircleEntity => UnitCirclePropData.ValueRO.UnitCircleEntity;
 
-    public readonly RefRO<UnitCirclePropertiesData> UnitCirclePropData;
+    public readonly RefRW<UnitCirclePropertiesData> UnitCirclePropData;
 }

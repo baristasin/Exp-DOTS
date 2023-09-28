@@ -25,32 +25,41 @@ public partial struct SoldierCreationSystem : ISystem
     {
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
-        byte battalionIndex = 0;
-
         foreach (var soldierCreatorData in SystemAPI.Query<SoldierCreatorData>())
-        {           
-            for (int i = 0; i < 250; i++)
+        {
+            int counter = 10;
+            int lineIndex = soldierCreatorData.SoldierCount / 10;
+
+            for (int i = 0; i < soldierCreatorData.SoldierCount; i++)
             {
+                if (counter <= 0)
+                {
+                    counter = 10;
+                    lineIndex--;
+                }
+
                 var soldierEntity = ecb.Instantiate(soldierCreatorData.SoldierEntity);
 
                 LocalTransform soldierTransform = new LocalTransform
                 {
-                    Position = new float3(0, 1.5f, 0),
+                    Position = new float3(counter * 1.5f, 1.5f, -lineIndex * 1.5f),
                     Rotation = quaternion.identity,
                     Scale = 1f
                 };
 
                 ecb.AddComponent(soldierEntity, new SoldierMovementData
                 {
-                    MovementSpeed = 6f,
+                    MovementSpeed = 15f,
                     TargetPosition = soldierTransform.Position,
                     TargetRotation = soldierTransform.Rotation
                 });
 
-                SoldierBattalionData soldierBattalionData = new SoldierBattalionData { BattalionId = 1,IsBattalionChosen = 1 };
+                SoldierBattalionData soldierBattalionData = new SoldierBattalionData { BattalionId = 1, IsBattalionChosen = 1 };
 
                 ecb.AddComponent(soldierEntity, soldierTransform);
                 ecb.AddSharedComponent(soldierEntity, soldierBattalionData);
+
+                counter--;
             }
 
         }

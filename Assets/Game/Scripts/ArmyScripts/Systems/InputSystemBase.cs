@@ -15,42 +15,30 @@ public partial class InputSystemBase : SystemBase
     {
         _mainCamera = Camera.main;
         var inputEntity = EntityManager.CreateEntity();
-        EntityManager.AddComponent(inputEntity, typeof(InputData));
         RequireForUpdate<InputData>();
         base.OnCreate();
     }
 
     protected override void OnUpdate()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            var inputGroundFirstPos = GetGroundInputPosition();
+        var inputDataSingleton = SystemAPI.GetSingletonEntity<InputData>();
+        var inputDataAspect = SystemAPI.GetAspect<InputAspect>(inputDataSingleton);
 
-            foreach (var inputData in SystemAPI.Query<RefRW<InputData>>())
-            {
-                inputData.ValueRW.GroundInputStartingPos = inputGroundFirstPos;
-            }
+        if (Input.GetMouseButtonDown(1))
+        {
+            inputDataAspect.InputData.ValueRW.GroundInputStartingPos = GetGroundInputPosition();
+            inputDataAspect.InputData.ValueRW.IsDragging = 1;
         }
 
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(1))
         {
-            var inputGroundPos = GetGroundInputPosition();
-
-            foreach (var inputData in SystemAPI.Query<RefRW<InputData>>())
-            {
-                inputData.ValueRW.GroundInputPos = inputGroundPos;
-            }
+            inputDataAspect.InputData.ValueRW.GroundInputPos = GetGroundInputPosition();
         }
 
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(1))
         {
-            var inputGroundEndingPos = GetGroundInputPosition();
-
-            foreach (var inputData in SystemAPI.Query<RefRW<InputData>>())
-            {
-                inputData.ValueRW.GroundInputEndingPos = inputGroundEndingPos;
-            }
-
+            inputDataAspect.InputData.ValueRW.GroundInputEndingPos = GetGroundInputPosition();
+            inputDataAspect.InputData.ValueRW.IsDragging = 0;
         }
     }
 

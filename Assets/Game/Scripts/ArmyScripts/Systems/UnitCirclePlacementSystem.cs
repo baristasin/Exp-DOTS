@@ -35,78 +35,41 @@ public partial struct UnitCirclePlacementSystem : ISystem
         var unitCirclePropertiesEntity = SystemAPI.GetSingletonEntity<UnitCirclePropertiesData>();
         var unitCirclePropsAspect = SystemAPI.GetAspect<UnitCirclePropertiesAspect>(unitCirclePropertiesEntity);
 
-        if (unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount <= 0
-            && IsCircleUnitsInstantiated == 1) // if chosen soldier count = 0 and there are circleunits instantiated, clear all
+        var inputDataEntity = SystemAPI.GetSingletonEntity<InputData>();
+        var inputDataAspect = SystemAPI.GetAspect<InputAspect>(inputDataEntity);
+
+        if(inputDataAspect.InputData.ValueRO.IsDragging == 1) // Dragging
         {
-            var ecbSingleton = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
-            var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
+            if (unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount <= 0) return;
 
-            new DestroyAllUnitCirclesJob
+            if (IsCircleUnitsInstantiated == 1) return;
+
+            if (math.distance(inputDataAspect.InputData.ValueRO.GroundInputStartingPos, inputDataAspect.InputData.ValueRO.GroundInputPos) > 3f)
             {
-                ecb = ecb
-            }.Schedule();
+                var ecbSingleton = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
+                var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-            IsCircleUnitsInstantiated = 0;
-        }
-        else // selected count > 0 and circles not instantiated
-        {
-            if (Input.GetMouseButton(0) && IsCircleUnitsInstantiated == 0)
-            {
-
-                var inputDataEntity = SystemAPI.GetSingletonEntity<InputData>();
-                var inputData = SystemAPI.GetComponent<InputData>(inputDataEntity);
-
-                if (math.distance(inputData.GroundInputStartingPos, inputData.GroundInputPos) > 3f)
+                for (int i = 0; i < unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount; i++)
                 {
-                    var ecbSingleton = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
-                    var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
-
-                    for (int i = 0; i < unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount; i++)
+                    var handle = new CreateUnitCirclesJob
                     {
-                        var handle = new CreateUnitCirclesJob
-                        {
-                            Counter = i,
-                            UnitCircleEntity = unitCirclePropsAspect.UnitCircleEntity,
-                            ecb = ecb
-                        }.Schedule();
+                        Counter = i,
+                        UnitCircleEntity = unitCirclePropsAspect.UnitCircleEntity,
+                        ecb = ecb
+                    }.Schedule();
 
-                        handle.Complete();
-                    }
-
-
-                    IsCircleUnitsInstantiated = 1;
-
-                    //for (int i = 0; i < unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount; i++)
-                    //{
-                    //    var unitCircleEntity = ecb.Instantiate(unitCirclePropsAspect.UnitCircleEntity);
-
-                    //    LocalTransform localTransform = new LocalTransform
-                    //    {
-                    //        Position = new float3(i, 0.5f, 0),
-                    //        Rotation = quaternion.identity,
-                    //        Scale = 1f
-                    //    };
-
-                    //    ecb.AddComponent(unitCircleEntity, localTransform);
-                    //}
-
-                    //IsCircleUnitsInstantiated = 1;
+                    handle.Complete();
                 }
+
+                IsCircleUnitsInstantiated = 1;
             }
         }
-
-        if (Input.GetMouseButtonUp(0)) // mouse up, clear all again
+        else // Not Dragging
         {
+            if (IsCircleUnitsInstantiated == 0) return;
+
             var ecbSingleton = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
             var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
-
-            //foreach (var (unitCircleData, unitCircleTransform) in SystemAPI.Query<RefRO<UnitCircleData>, RefRW<LocalTransform>>())
-            //{
-            //    ecb.AppendToBuffer(unitCirclePropertiesEntity, new UnitCirclePlacementBufferElementData
-            //    {
-            //        UnitCirclePosXZ = new float2(unitCircleTransform.ValueRO.Position.x, unitCircleTransform.ValueRO.Position.z),
-            //    });
-            //}
 
             ecb.AddBuffer<UnitCirclePlacementBufferElementData>(unitCirclePropertiesEntity);
 
@@ -122,8 +85,9 @@ public partial struct UnitCirclePlacementSystem : ISystem
             }.Schedule(_unitCircleQuery);
 
             IsCircleUnitsInstantiated = 0;
-        }
 
+            unitCirclePropsAspect.UnitCirclePropData.ValueRW.IsBufferLoadedWithPositions = 1;
+        }
     }
 }
 

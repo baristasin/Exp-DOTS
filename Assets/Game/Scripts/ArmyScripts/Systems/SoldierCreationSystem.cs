@@ -54,10 +54,12 @@ public partial struct SoldierCreationSystem : ISystem
                     TargetRotation = soldierTransform.Rotation
                 });
 
-                SoldierBattalionData soldierBattalionData = new SoldierBattalionData { BattalionId = 1, IsBattalionChosen = 0 };
+                SoldierBattalionIdData soldierBattalionData = new SoldierBattalionIdData { BattalionId = 1 };
+                SoldierBattalionIsChosenData soldierBattalionIsChosenData = new SoldierBattalionIsChosenData { IsBattalionChosen = 0 };
 
                 ecb.AddComponent(soldierEntity, soldierTransform);
                 ecb.AddSharedComponent(soldierEntity, soldierBattalionData);
+                ecb.AddSharedComponent(soldierEntity, soldierBattalionIsChosenData);
 
                 counter--;
             }

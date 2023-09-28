@@ -35,10 +35,10 @@ public partial struct SoldierMoveOrderSystem : ISystem
 
         var unitCirclePropertiesEntity = SystemAPI.GetSingletonEntity<UnitCirclePropertiesData>();
 
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(1))
         {
             foreach (var (soldierTransform, soldierMovementData, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<SoldierMovementData>>()
-                .WithSharedComponentFilter(new SoldierBattalionData { BattalionId = 1, IsBattalionChosen = 1 }).WithEntityAccess())
+                .WithSharedComponentFilter(new SoldierBattalionIsChosenData { IsBattalionChosen = 1 }).WithEntityAccess())
             {
                 _unitCirclePlacementBufferLookUp.Update(ref state);
 

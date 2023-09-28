@@ -9,6 +9,7 @@ using UnityEngine;
 
 //[DisableAutoCreation]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
+[UpdateAfter(typeof(InputSystemBase))]
 public partial struct UnitCirclePlacementSystem : ISystem
 {
     public int IsCircleUnitsInstantiated;
@@ -50,7 +51,7 @@ public partial struct UnitCirclePlacementSystem : ISystem
         }
         else // selected count > 0 and circles not instantiated
         {
-            if (Input.GetMouseButton(0) && IsCircleUnitsInstantiated == 0)
+            if (Input.GetMouseButton(1) && IsCircleUnitsInstantiated == 0)
             {
 
                 var inputDataEntity = SystemAPI.GetSingletonEntity<InputData>();
@@ -75,27 +76,11 @@ public partial struct UnitCirclePlacementSystem : ISystem
 
 
                     IsCircleUnitsInstantiated = 1;
-
-                    //for (int i = 0; i < unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount; i++)
-                    //{
-                    //    var unitCircleEntity = ecb.Instantiate(unitCirclePropsAspect.UnitCircleEntity);
-
-                    //    LocalTransform localTransform = new LocalTransform
-                    //    {
-                    //        Position = new float3(i, 0.5f, 0),
-                    //        Rotation = quaternion.identity,
-                    //        Scale = 1f
-                    //    };
-
-                    //    ecb.AddComponent(unitCircleEntity, localTransform);
-                    //}
-
-                    //IsCircleUnitsInstantiated = 1;
                 }
             }
         }
 
-        if (Input.GetMouseButtonUp(0)) // mouse up, clear all again
+        if (Input.GetMouseButtonUp(1)) // mouse up, clear all again
         {
             var ecbSingleton = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
             var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);

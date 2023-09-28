@@ -5,6 +5,7 @@ using System.Collections;
 public class SoldierCreatorMono : MonoBehaviour
 {
     public GameObject SoldierObject;
+    public int SoldierCount;
 }
 
 public class SoldierCreatorBaker : Baker<SoldierCreatorMono>
@@ -15,7 +16,8 @@ public class SoldierCreatorBaker : Baker<SoldierCreatorMono>
 
         AddComponent(entity, new SoldierCreatorData
         {
-            SoldierEntity = GetEntity(authoring.SoldierObject, TransformUsageFlags.Dynamic)
+            SoldierEntity = GetEntity(authoring.SoldierObject, TransformUsageFlags.Dynamic),
+            SoldierCount = authoring.SoldierCount
         });
 
     }

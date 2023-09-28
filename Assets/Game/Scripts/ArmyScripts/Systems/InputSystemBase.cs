@@ -5,11 +5,13 @@ using Unity.Physics;
 using UnityEngine;
 
 //[DisableAutoCreation]
-[UpdateInGroup(typeof(InitializationSystemGroup),OrderFirst = true)]
+[UpdateInGroup(typeof(InitializationSystemGroup), OrderFirst = true)]
 public partial class InputSystemBase : SystemBase
 {
     private Camera _mainCamera;
     private CollisionWorld _collisionWorld;
+
+    private byte _isDraggingOnGround;
 
     protected override void OnCreate()
     {
@@ -17,6 +19,8 @@ public partial class InputSystemBase : SystemBase
         var inputEntity = EntityManager.CreateEntity();
         EntityManager.AddComponent(inputEntity, typeof(InputData));
         RequireForUpdate<InputData>();
+        RequireForUpdate<UnitCirclePropertiesData>();
+        RequireForUpdate<PhysicsWorldSingleton>();
         base.OnCreate();
     }
 
@@ -24,37 +28,66 @@ public partial class InputSystemBase : SystemBase
     {
         if (Input.GetMouseButtonDown(0))
         {
-            var inputGroundFirstPos = GetGroundInputPosition();
-
-            foreach (var inputData in SystemAPI.Query<RefRW<InputData>>())
+            if (SystemAPI.HasComponent<GroundTag>(GetGroundInputPosition().Item2))
             {
-                inputData.ValueRW.GroundInputStartingPos = inputGroundFirstPos;
+                var inputGroundFirstPos = GetGroundInputPosition().Item1;
+
+                foreach (var inputData in SystemAPI.Query<RefRW<InputData>>())
+                {
+                    inputData.ValueRW.GroundInputStartingPos = inputGroundFirstPos;
+                }
+
+                _isDraggingOnGround = 1;
+            }
+
+            else if (SystemAPI.HasComponent<SoldierMovementData>(GetGroundInputPosition().Item2))
+            {
+                var soldierBattalionData = EntityManager.GetSharedComponent<SoldierBattalionData>(GetGroundInputPosition().Item2);
+
+                int counter = 0;
+
+                foreach (var (movementData, entity) in SystemAPI.Query<SoldierMovementData>().WithEntityAccess().WithSharedComponentFilter<SoldierBattalionData>
+                    (new SoldierBattalionData { BattalionId = soldierBattalionData.BattalionId, IsBattalionChosen = 0 }))
+                {
+                    EntityManager.SetSharedComponentManaged<SoldierBattalionData>(entity, new SoldierBattalionData { BattalionId = soldierBattalionData.BattalionId, IsBattalionChosen = 1 });
+                    counter++;
+                }
+
+                //var unitCirclePropertiesData = SystemAPI.GetSingletonEntity<UnitCirclePropertiesData>();
+                //SystemAPI.SetComponent<UnitCirclePropertiesData>(unitCirclePropertiesData, new UnitCirclePropertiesData { CurrentSelectedSoldierCount = counter });
             }
         }
 
         if (Input.GetMouseButton(0))
         {
-            var inputGroundPos = GetGroundInputPosition();
-
-            foreach (var inputData in SystemAPI.Query<RefRW<InputData>>())
+            if (_isDraggingOnGround == 1)
             {
-                inputData.ValueRW.GroundInputPos = inputGroundPos;
+                var inputGroundPos = GetGroundInputPosition().Item1;
+
+                foreach (var inputData in SystemAPI.Query<RefRW<InputData>>())
+                {
+                    inputData.ValueRW.GroundInputPos = inputGroundPos;
+                }
             }
         }
 
         if (Input.GetMouseButtonUp(0))
         {
-            var inputGroundEndingPos = GetGroundInputPosition();
-
-            foreach (var inputData in SystemAPI.Query<RefRW<InputData>>())
+            if (_isDraggingOnGround == 1)
             {
-                inputData.ValueRW.GroundInputEndingPos = inputGroundEndingPos;
-            }
 
+                var inputGroundEndingPos = GetGroundInputPosition();
+
+                foreach (var inputData in SystemAPI.Query<RefRW<InputData>>())
+                {
+                    inputData.ValueRW.GroundInputEndingPos = inputGroundEndingPos.Item1;
+                }
+            }
+            _isDraggingOnGround = 0;
         }
     }
 
-    private float3 GetGroundInputPosition()
+    private (float3, Entity) GetGroundInputPosition()
     {
         _collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
 
@@ -64,11 +97,11 @@ public partial class InputSystemBase : SystemBase
 
         if (Raycast(rayStart, rayEnd, out var hit))
         {
-            //var hitEntity = SystemAPI.GetSingleton<PhysicsWorldSingleton>().Bodies[hit.RigidBodyIndex].Entity;
-            return hit.Position;
+            var hitEntity = SystemAPI.GetSingleton<PhysicsWorldSingleton>().Bodies[hit.RigidBodyIndex].Entity;
+            return (hit.Position, hitEntity);
         }
 
-        return new float3(0, 0, 0);
+        return (new float3(0, 0, 0), new Entity());
     }
 
     private bool Raycast(float3 rayStart, float3 rayEnd, out Unity.Physics.RaycastHit raycastHit)
@@ -88,3 +121,4 @@ public partial class InputSystemBase : SystemBase
         return _collisionWorld.CastRay(raycastInput, out raycastHit);
     }
 }
+

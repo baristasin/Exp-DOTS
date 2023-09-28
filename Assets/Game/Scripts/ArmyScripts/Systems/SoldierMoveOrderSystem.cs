@@ -45,44 +45,41 @@ public partial struct SoldierMoveOrderSystem : ISystem
                 _unitCirclePlacementBufferLookUp.TryGetBuffer(unitCirclePropertiesEntity, out var unitCirclePlacementBufferForMove);
 
                 if (unitCirclePlacementBufferForMove.Length <= 0) return;
-                if (IsInstantMove == 1)
-                {
-                    soldierTransform.ValueRW.Position = new float3(unitCirclePlacementBufferForMove[counter].UnitCirclePosXZ.x,
-                        soldierTransform.ValueRO.Position.y,
-                        unitCirclePlacementBufferForMove[counter].UnitCirclePosXZ.y);
 
-                    soldierTransform.ValueRW.Rotation = unitCirclePlacementBufferForMove[counter].UnitCircleRotation;
-                }
+                soldierMovementData.ValueRW.TargetPosition = new float3(unitCirclePlacementBufferForMove[counter].UnitCirclePosXZ.x,
+                    1.5f,
+                    unitCirclePlacementBufferForMove[counter].UnitCirclePosXZ.y);
 
-                else
-                {
-                    soldierMovementData.ValueRW.TargetPosition = new float3(unitCirclePlacementBufferForMove[counter].UnitCirclePosXZ.x,
-                        soldierTransform.ValueRO.Position.y,
-                        unitCirclePlacementBufferForMove[counter].UnitCirclePosXZ.y);
-
-                    soldierMovementData.ValueRW.TargetRotation = unitCirclePlacementBufferForMove[counter].UnitCircleRotation;
-                }
+                soldierMovementData.ValueRW.TargetRotation = unitCirclePlacementBufferForMove[counter].UnitCircleRotation;
 
                 counter++;
             }
 
             var ecb = new EntityCommandBuffer(Allocator.Temp);
-            ecb.RemoveComponent<UnitCirclePlacementBufferElementData>(unitCirclePropertiesEntity);
+            //ecb.RemoveComponent<UnitCirclePlacementBufferElementData>(unitCirclePropertiesEntity);
         }
 
         foreach (var (soldierTransform, soldierMovementData) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<SoldierMovementData>>()) // Jobify
         {
-            if(Vector3.Distance(soldierTransform.ValueRO.Position,soldierMovementData.ValueRO.TargetPosition) is var distToTarget && distToTarget > 0.05f)
-            {                
-                soldierTransform.ValueRW.Position += math.normalize(soldierMovementData.ValueRO.TargetPosition - soldierTransform.ValueRO.Position) * deltaTime * soldierMovementData.ValueRO.MovementSpeed;
-
-                if(distToTarget < 0.1f)
+            if (Vector3.Distance(soldierTransform.ValueRO.Position, soldierMovementData.ValueRO.TargetPosition) is var distToTarget && distToTarget > 0.05f)
+            {
+                if (IsInstantMove == 0)
                 {
-                    soldierTransform.ValueRW.Rotation = soldierMovementData.ValueRO.TargetRotation;
+                    soldierTransform.ValueRW.Position += math.normalize(soldierMovementData.ValueRO.TargetPosition - soldierTransform.ValueRO.Position) * deltaTime * soldierMovementData.ValueRO.MovementSpeed;
+
+                    if (distToTarget < 0.2f)
+                    {
+                        soldierTransform.ValueRW.Rotation = soldierMovementData.ValueRO.TargetRotation;
+                    }
+                    else
+                    {
+                        soldierTransform.ValueRW.Rotation = quaternion.RotateY(RotateTowards(soldierTransform.ValueRO.Position, soldierMovementData.ValueRO.TargetPosition));
+                    }
                 }
                 else
                 {
-                    soldierTransform.ValueRW.Rotation = quaternion.RotateY(RotateTowards(soldierTransform.ValueRO.Position, soldierMovementData.ValueRO.TargetPosition));
+                    soldierTransform.ValueRW.Position = soldierMovementData.ValueRO.TargetPosition;
+                    soldierTransform.ValueRW.Rotation = soldierMovementData.ValueRO.TargetRotation;
                 }
             }
         }

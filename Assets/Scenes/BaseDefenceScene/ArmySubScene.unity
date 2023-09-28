@@ -133,7 +133,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -1891627238288276181, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: GunShootInterval
-      value: 0.04
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 6412617191925608916, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: m_Name
@@ -194,7 +194,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -1891627238288276181, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: GunShootInterval
-      value: 0.04
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 6412617191925608916, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: m_Name
@@ -255,7 +255,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -1891627238288276181, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: GunShootInterval
-      value: 0.04
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 6412617191925608916, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: m_Name
@@ -399,7 +399,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -1891627238288276181, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: GunShootInterval
-      value: 0.01
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 6412617191925608916, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: m_Name
@@ -515,7 +515,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -1891627238288276181, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: GunShootInterval
-      value: 0.04
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 6412617191925608916, guid: 85db381451308460ab9cd3f4c0fb5809, type: 3}
       propertyPath: m_Name

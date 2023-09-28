@@ -491,6 +491,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitCircleObject: {fileID: 8414154005003441462, guid: 05cc50ad63568454b899b26f7448f080, type: 3}
+  SoldierCount: 0
 --- !u!4 &645817304
 Transform:
   m_ObjectHideFlags: 0

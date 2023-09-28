@@ -6,6 +6,7 @@ using UnityEngine;
 public class UnitCirclePropertiesMono : MonoBehaviour
 {
     public GameObject UnitCircleObject;
+    public int SoldierCount;
 }
 
 public class UnitCirclePropertiesBaker : Baker<UnitCirclePropertiesMono>
@@ -16,7 +17,8 @@ public class UnitCirclePropertiesBaker : Baker<UnitCirclePropertiesMono>
 
         AddComponent(entity, new UnitCirclePropertiesData
         {
-            UnitCircleEntity = GetEntity(authoring.UnitCircleObject, TransformUsageFlags.Dynamic)
+            UnitCircleEntity = GetEntity(authoring.UnitCircleObject, TransformUsageFlags.Dynamic),
+            CurrentSelectedSoldierCount = authoring.SoldierCount
         });
     }
 }

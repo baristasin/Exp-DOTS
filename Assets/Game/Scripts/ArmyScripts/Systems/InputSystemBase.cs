@@ -28,8 +28,16 @@ public partial class InputSystemBase : SystemBase
     {
         if (Input.GetMouseButtonDown(0))
         {
-            if (SystemAPI.HasComponent<GroundTag>(GetGroundInputPosition().Item2))
+            if (SystemAPI.HasComponent<GroundTag>(GetGroundInputPosition().hitTargetEntity))
             {
+                var unitCirclePropsEntity = SystemAPI.GetSingletonEntity<UnitCirclePropertiesData>();
+                var unityCirclePropsData = EntityManager.GetComponentData<UnitCirclePropertiesData>(unitCirclePropsEntity);
+
+                if(unityCirclePropsData.CurrentSelectedSoldierCount <= 0)
+                {
+                    return;
+                }
+
                 var inputGroundFirstPos = GetGroundInputPosition().Item1;
 
                 foreach (var inputData in SystemAPI.Query<RefRW<InputData>>())
@@ -40,21 +48,31 @@ public partial class InputSystemBase : SystemBase
                 _isDraggingOnGround = 1;
             }
 
-            else if (SystemAPI.HasComponent<SoldierMovementData>(GetGroundInputPosition().Item2))
+            else if (SystemAPI.HasComponent<SoldierMovementData>(GetGroundInputPosition().hitTargetEntity))
             {
+
                 var soldierBattalionData = EntityManager.GetSharedComponent<SoldierBattalionData>(GetGroundInputPosition().Item2);
 
                 int counter = 0;
 
+                var ecb = new EntityCommandBuffer(Allocator.Temp);
+
+                var unitCirclePropertiesEntity = SystemAPI.GetSingletonEntity<UnitCirclePropertiesData>();
+
+
                 foreach (var (movementData, entity) in SystemAPI.Query<SoldierMovementData>().WithEntityAccess().WithSharedComponentFilter<SoldierBattalionData>
                     (new SoldierBattalionData { BattalionId = soldierBattalionData.BattalionId, IsBattalionChosen = 0 }))
                 {
-                    EntityManager.SetSharedComponentManaged<SoldierBattalionData>(entity, new SoldierBattalionData { BattalionId = soldierBattalionData.BattalionId, IsBattalionChosen = 1 });
+                    ecb.SetSharedComponentManaged<SoldierBattalionData>(entity, new SoldierBattalionData { BattalionId = soldierBattalionData.BattalionId, IsBattalionChosen = 1 });
                     counter++;
                 }
 
-                //var unitCirclePropertiesData = SystemAPI.GetSingletonEntity<UnitCirclePropertiesData>();
-                //SystemAPI.SetComponent<UnitCirclePropertiesData>(unitCirclePropertiesData, new UnitCirclePropertiesData { CurrentSelectedSoldierCount = counter });
+                foreach (var unitCirclePropsData in SystemAPI.Query<RefRW<UnitCirclePropertiesData>>())
+                {
+                    unitCirclePropsData.ValueRW.CurrentSelectedSoldierCount = counter;
+                }
+
+                ecb.Playback(EntityManager);
             }
         }
 
@@ -87,7 +105,7 @@ public partial class InputSystemBase : SystemBase
         }
     }
 
-    private (float3, Entity) GetGroundInputPosition()
+    private (float3 position, Entity hitTargetEntity) GetGroundInputPosition()
     {
         _collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
 

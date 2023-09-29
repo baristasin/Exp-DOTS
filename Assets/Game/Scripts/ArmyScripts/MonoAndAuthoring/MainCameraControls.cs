@@ -13,8 +13,8 @@ public class MainCameraControls : MonoBehaviour
         if (Input.GetKey("a"))
         {
             var rightWithoutY = new Vector3(_cameraTransform.right.x, 0, _cameraTransform.right.z);
-            _cameraTransform.position += -1 *rightWithoutY * Time.deltaTime * 12f * _positionUpdateMultiplier;
-            _positionUpdateMultiplier += Time.deltaTime * 3f;
+            _cameraTransform.position += -1 * rightWithoutY * Time.deltaTime * 12f * _positionUpdateMultiplier;
+            _positionUpdateMultiplier += Time.deltaTime * 10f;
         }
 
         if (Input.GetKey("s"))
@@ -33,11 +33,18 @@ public class MainCameraControls : MonoBehaviour
 
         if (Input.GetKey("w"))
         {
-            var forwardWithoutY = new Vector3(_cameraTransform.forward.x,0, _cameraTransform.forward.z);
+            var forwardWithoutY = new Vector3(_cameraTransform.forward.x, 0, _cameraTransform.forward.z);
             _cameraTransform.position += forwardWithoutY * Time.deltaTime * 12f * _positionUpdateMultiplier;
             _positionUpdateMultiplier += Time.deltaTime * 3f;
         }
 
-        _positionUpdateMultiplier = 1;
+        if (Input.GetKey("a") || Input.GetKey("s") || Input.GetKey("d") || Input.GetKey("w"))
+        {
+
+        }
+        else
+        {
+            _positionUpdateMultiplier = 1;
+        }
     }
 }

@@ -91,7 +91,7 @@ public partial class BattalionClickInputSystemBase : SystemBase
 
         var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
         var rayStart = ray.origin;
-        var rayEnd = ray.GetPoint(100f);
+        var rayEnd = ray.GetPoint(1500f);
 
         if (Raycast(rayStart, rayEnd, out var hit))
         {

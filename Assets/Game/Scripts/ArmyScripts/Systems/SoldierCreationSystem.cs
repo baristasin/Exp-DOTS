@@ -3,9 +3,12 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
+using Random = UnityEngine.Random;
 
 //[DisableAutoCreation]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
+[BurstCompile]
 public partial struct SoldierCreationSystem : ISystem
 {
     public BufferLookup<SoldierCreationBufferElementData> _soldierCreationBufferElementData;
@@ -75,16 +78,17 @@ public partial struct SoldierCreationSystem : ISystem
 
                     LocalTransform soldierTransform = new LocalTransform
                     {
-                        Position = new float3(counter * 1.5f + horizontalBattalionOffset, 1.5f, -lineIndex * 1.5f),
+                        Position = new float3(counter * 1.3f + horizontalBattalionOffset, 1.5f, -lineIndex * 1.3f),
                         Rotation = quaternion.identity,
                         Scale = 1f
                     };
 
                     ecb.AddComponent(soldierEntity, new SoldierMovementData
                     {
-                        MovementSpeed = 15f,
+                        MovementSpeed = Random.Range(7f,10f),
                         TargetPosition = soldierTransform.Position,
-                        TargetRotation = soldierTransform.Rotation
+                        TargetRotation = soldierTransform.Rotation,
+                        SoldierCounterAndLineValues = new float2(counter,lineIndex)
                     });
 
                     SoldierBattalionIdData soldierBattalionIdData = new SoldierBattalionIdData { BattalionId = i };

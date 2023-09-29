@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Unity.Entities;
-using System.Collections;
+using Unity.Mathematics;
+using Random = Unity.Mathematics.Random;
 
 public class SoldierMono : MonoBehaviour
 {

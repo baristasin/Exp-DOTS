@@ -27,17 +27,21 @@ public partial class GroundInputSystemBase : SystemBase
         {
             inputDataAspect.InputData.ValueRW.GroundInputStartingPos = GetGroundInputPosition();
             inputDataAspect.InputData.ValueRW.IsDragging = 1;
+            inputDataAspect.InputData.ValueRW.IsRightClickUpOnGround = 0;
         }
 
         if (Input.GetMouseButton(1))
         {
             inputDataAspect.InputData.ValueRW.GroundInputPos = GetGroundInputPosition();
+            inputDataAspect.InputData.ValueRW.IsRightClickUpOnGround = 0;
         }
 
         if (Input.GetMouseButtonUp(1))
         {
+            Debug.Log("right click up");
             inputDataAspect.InputData.ValueRW.GroundInputEndingPos = GetGroundInputPosition();
             inputDataAspect.InputData.ValueRW.IsDragging = 0;
+            inputDataAspect.InputData.ValueRW.IsRightClickUpOnGround = 1;
         }
     }
 
@@ -47,12 +51,13 @@ public partial class GroundInputSystemBase : SystemBase
 
         var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
         var rayStart = ray.origin;
-        var rayEnd = ray.GetPoint(100f);
+        var rayEnd = ray.GetPoint(1500f);
 
         if (Raycast(rayStart, rayEnd, out var hit))
         {
             //var hitEntity = SystemAPI.GetSingleton<PhysicsWorldSingleton>().Bodies[hit.RigidBodyIndex].Entity;
-            return hit.Position;
+
+            return new float3(hit.Position.x,1.5f,hit.Position.z);
         }
 
         return new float3(0, 0, 0);

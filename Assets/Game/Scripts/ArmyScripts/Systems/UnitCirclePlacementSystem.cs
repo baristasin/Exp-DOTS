@@ -38,9 +38,10 @@ public partial struct UnitCirclePlacementSystem : ISystem
         var inputDataEntity = SystemAPI.GetSingletonEntity<GroundInputData>();
         var inputDataAspect = SystemAPI.GetAspect<GroundInputAspect>(inputDataEntity);
 
-        if(inputDataAspect.InputData.ValueRO.IsDragging == 1) // Dragging
+        if (unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount <= 0) return;
+
+        if (inputDataAspect.InputData.ValueRO.IsDragging == 1) // Dragging
         {
-            if (unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount <= 0) return;
 
             if (IsCircleUnitsInstantiated == 1) return;
 
@@ -66,7 +67,10 @@ public partial struct UnitCirclePlacementSystem : ISystem
         }
         else // Not Dragging
         {
-            if (IsCircleUnitsInstantiated == 0) return;
+            if (IsCircleUnitsInstantiated == 0)
+            {               
+                return;
+            }
 
             var ecbSingleton = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
             var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
@@ -134,12 +138,13 @@ public partial struct AddUnitCirclesToGeneralBufferJob : IJobEntity
     public EntityCommandBuffer Ecb;
 
     [BurstCompile]
-    public void Execute(Entity entity, LocalTransform unitCircleTransform)
+    public void Execute(Entity entity, LocalTransform unitCircleTransform,UnitCircleData unitCircleData)
     {
         Ecb.AppendToBuffer<UnitCirclePlacementBufferElementData>(UnitCirclePropertiesEntity, new UnitCirclePlacementBufferElementData
         {
             UnitCirclePosXZ = new float2(unitCircleTransform.Position.x, unitCircleTransform.Position.z),
-            UnitCircleRotation = unitCircleTransform.Rotation
+            UnitCircleRotation = unitCircleTransform.Rotation,
+            UnitCircleCounterAndLineIndexValues = new float2(unitCircleData.UnitCircleCounterAndLineValues.x,unitCircleData.UnitCircleCounterAndLineValues.y)
         });
     }
 }

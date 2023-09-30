@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Entities.UniversalDelegates;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -13,12 +14,16 @@ public partial struct SoldierMoveOrderSystem : ISystem
     public byte IsInstantMove;
 
     public BufferLookup<UnitCirclePlacementBufferElementData> _unitCirclePlacementBufferLookUp;
+    public BufferLookup<UnitCircleSelectedBattalionAndCountBufferElementData> _selectedBattalionAndCountBufferLookup;
+
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<UnitCirclePropertiesData>();
         _unitCirclePlacementBufferLookUp = state.GetBufferLookup<UnitCirclePlacementBufferElementData>(false);
+        _selectedBattalionAndCountBufferLookup = state.GetBufferLookup<UnitCircleSelectedBattalionAndCountBufferElementData>(true);
+
         IsInstantMove = 0;
     }
 
@@ -28,17 +33,29 @@ public partial struct SoldierMoveOrderSystem : ISystem
 
     }
 
-    public (UnitCirclePlacementBufferElementData circle, int itemIndex) GetDesiredCircleAndItsIndex(RefRW<SoldierMovementData> soldierMovementData, DynamicBuffer<UnitCirclePlacementBufferElementData> unitCirclePlacementBufferElementDatas)
+    public (UnitCirclePlacementBufferElementData circle, int itemIndex) GetDesiredCircleAndItsIndex(RefRW<SoldierMovementData> soldierMovementData, DynamicBuffer<UnitCirclePlacementBufferElementData> unitCirclePlacementBufferElementDatas, int battalionId)
     {
         for (int i = 0; i < unitCirclePlacementBufferElementDatas.Length; i++)
         {
-            if (math.Equals(soldierMovementData.ValueRO.SoldierCounterAndLineValues, unitCirclePlacementBufferElementDatas[i].UnitCircleCounterAndLineIndexValues))
+            if (unitCirclePlacementBufferElementDatas[i].BattalionId == battalionId)
+            {
+                if (math.Equals(soldierMovementData.ValueRO.SoldierCounterAndLineValues, unitCirclePlacementBufferElementDatas[i].UnitCircleCounterAndLineIndexValues))
+                {
+                    return (unitCirclePlacementBufferElementDatas[i], i);
+                }
+            }
+        }
+
+        for (int i = 0; i < unitCirclePlacementBufferElementDatas.Length; i++)
+        {
+            if (unitCirclePlacementBufferElementDatas[i].BattalionId == battalionId)
             {
                 return (unitCirclePlacementBufferElementDatas[i], i);
             }
         }
 
-        return (unitCirclePlacementBufferElementDatas[unitCirclePlacementBufferElementDatas.Length-1], unitCirclePlacementBufferElementDatas.Length-1);
+        return (unitCirclePlacementBufferElementDatas[unitCirclePlacementBufferElementDatas.Length - 1], unitCirclePlacementBufferElementDatas.Length - 1);
+
     }
 
     [BurstCompile]
@@ -52,39 +69,51 @@ public partial struct SoldierMoveOrderSystem : ISystem
         var groundInputDataEntity = SystemAPI.GetSingletonEntity<GroundInputData>();
         var groundInputDataAspect = SystemAPI.GetAspect<GroundInputAspect>(groundInputDataEntity);
 
+        _unitCirclePlacementBufferLookUp.Update(ref state);
+
         if (unitCirclePropertiesAspect.UnitCirclePropData.ValueRO.IsBufferLoadedWithPositions == 1)
         {
-            foreach (var (soldierTransform, soldierMovementData, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<SoldierMovementData>>()
-                .WithSharedComponentFilter(new SoldierBattalionIsChosenData { IsBattalionChosen = 1 }).WithEntityAccess())
+            _selectedBattalionAndCountBufferLookup.Update(ref state);
+
+            if (_selectedBattalionAndCountBufferLookup.TryGetBuffer(unitCirclePropertiesEntity, out var selectedBattalionAndCountBuffer))
             {
-                _unitCirclePlacementBufferLookUp.Update(ref state);
+                for (int i = 0; i < selectedBattalionAndCountBuffer.Length; i++)
+                {
+                    foreach (var (soldierTransform, soldierMovementData, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<SoldierMovementData>>()
+    .WithSharedComponentFilter(new SoldierBattalionIsChosenData { IsBattalionChosen = 1 })
+    .WithEntityAccess())
+                    {
+                        _unitCirclePlacementBufferLookUp.TryGetBuffer(unitCirclePropertiesEntity, out var unitCirclePlacementBufferForMove);
 
-                _unitCirclePlacementBufferLookUp.TryGetBuffer(unitCirclePropertiesEntity, out var unitCirclePlacementBufferForMove);
+                        if (unitCirclePlacementBufferForMove.Length <= 0) return;
 
-                if (unitCirclePlacementBufferForMove.Length <= 0) return;
+                        var battalionId = state.EntityManager.GetSharedComponent<SoldierBattalionIdData>(entity);
 
-                var desiredCircleAndItsIndex = GetDesiredCircleAndItsIndex(soldierMovementData, unitCirclePlacementBufferForMove);
+                        var desiredCircleAndItsIndex = GetDesiredCircleAndItsIndex(soldierMovementData, unitCirclePlacementBufferForMove, battalionId.BattalionId);
 
-                soldierMovementData.ValueRW.TargetPosition = new float3(desiredCircleAndItsIndex.circle.UnitCirclePosXZ.x,
-                    1.5f,
-                    desiredCircleAndItsIndex.circle.UnitCirclePosXZ.y);
+                        soldierMovementData.ValueRW.TargetPosition = new float3(desiredCircleAndItsIndex.circle.UnitCirclePosXZ.x,
+                            1.5f,
+                            desiredCircleAndItsIndex.circle.UnitCirclePosXZ.y);
 
-                soldierMovementData.ValueRW.TargetRotation = desiredCircleAndItsIndex.circle.UnitCircleRotation;
+                        soldierMovementData.ValueRW.TargetRotation = desiredCircleAndItsIndex.circle.UnitCircleRotation;
 
-                soldierMovementData.ValueRW.SoldierCounterAndLineValues = new float2(desiredCircleAndItsIndex.circle.UnitCircleCounterAndLineIndexValues.x, desiredCircleAndItsIndex.circle.UnitCircleCounterAndLineIndexValues.y);
+                        soldierMovementData.ValueRW.SoldierCounterAndLineValues = new float2(desiredCircleAndItsIndex.circle.UnitCircleCounterAndLineIndexValues.x, desiredCircleAndItsIndex.circle.UnitCircleCounterAndLineIndexValues.y);
 
-                soldierMovementData.ValueRW.IsOrderTaken = 1;
+                        soldierMovementData.ValueRW.IsOrderTaken = 1;
 
-                soldierMovementData.ValueRW.OrderStartDelay = (counter) * 0.0025f;
+                        soldierMovementData.ValueRW.OrderStartDelay = (counter) * 0.0025f;
 
-                unitCirclePlacementBufferForMove.RemoveAt(desiredCircleAndItsIndex.itemIndex);
+                        unitCirclePlacementBufferForMove.RemoveAt(desiredCircleAndItsIndex.itemIndex);
 
-                counter++;
+                        counter++;
 
+                    }
+
+                unitCirclePropertiesAspect.UnitCirclePropData.ValueRW.IsBufferLoadedWithPositions = 0;
+                groundInputDataAspect.InputData.ValueRW.IsRightClickUpOnGround = 0;
+                }
             }
 
-            unitCirclePropertiesAspect.UnitCirclePropData.ValueRW.IsBufferLoadedWithPositions = 0;
-            groundInputDataAspect.InputData.ValueRW.IsRightClickUpOnGround = 0;
 
             //var ecb = new EntityCommandBuffer(Allocator.Temp);
 

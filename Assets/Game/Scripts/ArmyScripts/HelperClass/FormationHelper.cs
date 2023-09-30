@@ -8,7 +8,7 @@ using UnityEngine;
 public static class FormationHelper
 {
     [BurstCompile]
-    public static void FormationFuncLocalTransform(GroundInputAspect inputDataAspect, ref SystemState state, ref int counter, ref int lineIndex, ref int lineMaximumSoldierCount, RefRW<LocalTransform> unitTransform, RefRW<UnitCircleData> unitCircleData)
+    public static void FormationFuncLocalTransform(GroundInputAspect inputDataAspect, ref SystemState state, ref int counter, ref int lineIndex, ref int lineMaximumSoldierCount, RefRW<LocalTransform> unitTransform, RefRW<UnitCircleData> unitCircleData,int battalionId)
     {
         var alignmentDirectionNormalized = math.normalize(inputDataAspect.InputData.ValueRO.GroundInputPos - inputDataAspect.InputData.ValueRO.GroundInputStartingPos) * 2f;
         float angleBetweenVectors;
@@ -52,6 +52,8 @@ public static class FormationHelper
         // Q3 - Counter determines soldier horizontal order
         unitTransform.ValueRW.Position = inputDataAspect.InputData.ValueRO.GroundInputStartingPos + (counter * alignmentDirectionNormalized * 0.7f);
         // Q3 - Ends
+
+        unitTransform.ValueRW.Position += alignmentDirectionNormalized * battalionId * 2f * math.clamp(distanceBetweenInputs,3,100);
 
         // Q4 - Line Index determines soldier vertical order
         alignmentDirectionNormalized.x *= -1;

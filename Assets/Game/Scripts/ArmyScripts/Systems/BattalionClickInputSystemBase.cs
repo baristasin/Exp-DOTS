@@ -26,17 +26,23 @@ public partial class BattalionClickInputSystemBase : SystemBase
         if (Input.GetMouseButtonDown(0))
         {
             // Send clear all choose
-
             var ecb = new EntityCommandBuffer(Allocator.Temp);
 
-            foreach (var (movementData, entity) in SystemAPI.Query<SoldierMovementData>().WithEntityAccess())
+            if (!Input.GetKey(KeyCode.T))
             {
-                ecb.SetSharedComponentManaged<SoldierBattalionIsChosenData>(entity, new SoldierBattalionIsChosenData { IsBattalionChosen = 0 });
+                foreach (var (movementData, entity) in SystemAPI.Query<SoldierMovementData>().WithEntityAccess())
+                {
+                    ecb.SetSharedComponentManaged<SoldierBattalionIsChosenData>(entity, new SoldierBattalionIsChosenData { IsBattalionChosen = 0 });
+                }
+
+                unitCirclePropertiesAspect.UnitCirclePropData.ValueRW.CurrentSelectedSoldierCount = 0;
+
+                Debug.Log("All selections canceled");
+
+                ecb.AddBuffer<UnitCircleSelectedBattalionAndCountBufferElementData>(unitCirclePropertiesEntity);
             }
 
-            unitCirclePropertiesAspect.UnitCirclePropData.ValueRW.CurrentSelectedSoldierCount = 0;
 
-            Debug.Log("All selections canceled");
 
             var soldierEntity = GetSoldierEntity();
 
@@ -59,8 +65,9 @@ public partial class BattalionClickInputSystemBase : SystemBase
 
                 Debug.Log("Battalion picked");
 
-                unitCirclePropertiesAspect.UnitCirclePropData.ValueRW.CurrentSelectedSoldierCount = counter;
-
+                unitCirclePropertiesAspect.UnitCirclePropData.ValueRW.CurrentSelectedSoldierCount += counter;
+                ecb.AppendToBuffer<UnitCircleSelectedBattalionAndCountBufferElementData>(unitCirclePropertiesEntity
+                    , new UnitCircleSelectedBattalionAndCountBufferElementData { BattalionId = soldierBattalionData.BattalionId, SoldierCount = counter });
             }
 
             ecb.Playback(EntityManager);

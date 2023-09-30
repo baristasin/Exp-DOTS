@@ -15,12 +15,16 @@ public partial struct UnitCirclePlacementSystem : ISystem
 
     private EntityQuery _unitCircleQuery;
 
+    public BufferLookup<UnitCircleSelectedBattalionAndCountBufferElementData> _selectedBattalionAndCountBufferLookup;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<UnitCirclePropertiesData>();
 
         _unitCircleQuery = new EntityQueryBuilder(state.WorldUpdateAllocator).WithAll<UnitCircleData>().WithAll<LocalTransform>().Build(ref state);
+
+        _selectedBattalionAndCountBufferLookup = state.GetBufferLookup<UnitCircleSelectedBattalionAndCountBufferElementData>(true);
     }
 
     [BurstCompile]
@@ -47,19 +51,40 @@ public partial struct UnitCirclePlacementSystem : ISystem
 
             if (math.distance(inputDataAspect.InputData.ValueRO.GroundInputStartingPos, inputDataAspect.InputData.ValueRO.GroundInputPos) > 3f)
             {
+                _selectedBattalionAndCountBufferLookup.Update(ref state);
+
                 var ecbSingleton = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
                 var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-                for (int i = 0; i < unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount; i++)
-                {
-                    var handle = new CreateUnitCirclesJob
-                    {
-                        Counter = i,
-                        UnitCircleEntity = unitCirclePropsAspect.UnitCircleEntity,
-                        ecb = ecb
-                    }.Schedule();
+                //for (int i = 0; i < unitCirclePropsAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount; i++)
+                //{
+                //    var handle = new CreateUnitCirclesJob
+                //    {
+                //        Counter = i,
+                //        UnitCircleEntity = unitCirclePropsAspect.UnitCircleEntity,
+                //        ecb = ecb
+                //    }.Schedule();
 
-                    handle.Complete();
+                //    handle.Complete();
+                //}
+
+                if(_selectedBattalionAndCountBufferLookup.TryGetBuffer(unitCirclePropertiesEntity, out var buffer))
+                {
+                    for (int i = 0; i < buffer.Length; i++)
+                    {
+                        for (int j = 0; j < buffer[i].SoldierCount; j++)
+                        {
+                            var handle = new CreateUnitCirclesJob
+                            {
+                                Counter = i,
+                                UnitCircleEntity = unitCirclePropsAspect.UnitCircleEntity,
+                                BattalionId = buffer[i].BattalionId,
+                                ecb = ecb
+                            }.Schedule();
+
+                            handle.Complete();
+                        }
+                    }
                 }
 
                 IsCircleUnitsInstantiated = 1;
@@ -81,7 +106,7 @@ public partial struct UnitCirclePlacementSystem : ISystem
             {
                 UnitCirclePropertiesEntity = unitCirclePropertiesEntity,
                 Ecb = ecb
-            }.Run(_unitCircleQuery);
+            }.Run();
 
             new DestroyAllUnitCirclesJob
             {
@@ -100,6 +125,7 @@ public partial struct CreateUnitCirclesJob : IJob
 {
     public Entity UnitCircleEntity;
     public int Counter;
+    public int BattalionId;
     public EntityCommandBuffer ecb;
 
     [BurstCompile]
@@ -115,6 +141,7 @@ public partial struct CreateUnitCirclesJob : IJob
         };
 
         ecb.AddComponent(unitCircleEntity, localTransform);
+        ecb.AddSharedComponent(unitCircleEntity, new UnitCircleBattalionIdData { BattalionId = BattalionId });
     }
 
 }
@@ -138,12 +165,13 @@ public partial struct AddUnitCirclesToGeneralBufferJob : IJobEntity
     public EntityCommandBuffer Ecb;
 
     [BurstCompile]
-    public void Execute(Entity entity, LocalTransform unitCircleTransform,UnitCircleData unitCircleData)
+    public void Execute(Entity entity, LocalTransform unitCircleTransform,UnitCircleData unitCircleData,UnitCircleBattalionIdData unitCircleBattalionIdData)
     {
         Ecb.AppendToBuffer<UnitCirclePlacementBufferElementData>(UnitCirclePropertiesEntity, new UnitCirclePlacementBufferElementData
         {
             UnitCirclePosXZ = new float2(unitCircleTransform.Position.x, unitCircleTransform.Position.z),
             UnitCircleRotation = unitCircleTransform.Rotation,
+            BattalionId = unitCircleBattalionIdData.BattalionId,
             UnitCircleCounterAndLineIndexValues = new float2(unitCircleData.UnitCircleCounterAndLineValues.x,unitCircleData.UnitCircleCounterAndLineValues.y)
         });
     }

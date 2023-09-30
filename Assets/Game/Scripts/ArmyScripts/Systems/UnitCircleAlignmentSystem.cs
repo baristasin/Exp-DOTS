@@ -14,27 +14,46 @@ using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCou
 [UpdateAfter(typeof(UnitCirclePlacementSystem))]
 public partial struct UnitCircleAlignmentSystem : ISystem
 {
+    public BufferLookup<UnitCircleSelectedBattalionAndCountBufferElementData> _selectedBattalionAndCountBufferLookup;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<UnitCirclePropertiesData>();
         state.RequireForUpdate<GroundInputData>();
+
+        _selectedBattalionAndCountBufferLookup = state.GetBufferLookup<UnitCircleSelectedBattalionAndCountBufferElementData>(true);
+
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        int counter = 0;
-        int lineIndex = 0;
-        int lineMaximumSoldierCount = 10;
+        var unitCirclePropertiesEntity = SystemAPI.GetSingletonEntity<UnitCirclePropertiesData>();
+        var unitCirclePropertiesAspect = SystemAPI.GetAspect<UnitCirclePropertiesAspect>(unitCirclePropertiesEntity);        
 
-        foreach (var (unitCircleTransform,unitCircleData) in SystemAPI.Query<RefRW<LocalTransform>,RefRW<UnitCircleData>>())
+        if(unitCirclePropertiesAspect.UnitCirclePropData.ValueRO.CurrentSelectedSoldierCount > 0)
         {
-            var inputDataEntity = SystemAPI.GetSingletonEntity<GroundInputData>();
-            var inputDataAspect = SystemAPI.GetAspect<GroundInputAspect>(inputDataEntity);
+            _selectedBattalionAndCountBufferLookup.Update(ref state);
 
-            FormationHelper.FormationFuncLocalTransform(inputDataAspect, ref state, ref counter, ref lineIndex, ref lineMaximumSoldierCount, unitCircleTransform, unitCircleData);            
+            _selectedBattalionAndCountBufferLookup.TryGetBuffer(unitCirclePropertiesEntity, out var buffer);
+
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                int counter = 0;
+                int lineIndex = 0;
+                int lineMaximumSoldierCount = 10;
+
+                foreach (var (unitCircleTransform, unitCircleData) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<UnitCircleData>>().WithSharedComponentFilter(new UnitCircleBattalionIdData { BattalionId = buffer[i].BattalionId }))
+                {
+                    var inputDataEntity = SystemAPI.GetSingletonEntity<GroundInputData>();
+                    var inputDataAspect = SystemAPI.GetAspect<GroundInputAspect>(inputDataEntity);
+
+                    FormationHelper.FormationFuncLocalTransform(inputDataAspect, ref state, ref counter, ref lineIndex, ref lineMaximumSoldierCount, unitCircleTransform, unitCircleData, i);
+                }
+            }
         }
+
     }    
 }
 

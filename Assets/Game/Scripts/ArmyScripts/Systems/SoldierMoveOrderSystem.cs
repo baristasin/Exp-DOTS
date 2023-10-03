@@ -130,14 +130,14 @@ public partial struct SoldierMoveOrderSystem : ISystem
             foreach (var (soldierTransform, soldierMovementData, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<SoldierMovementData>>()
                 .WithSharedComponentFilter(new SoldierBattalionIsChosenData { IsBattalionChosen = 1 }).WithEntityAccess())
             {
-                if (counter == 0) // Calculate movement distance vector
+                if (counter == 0) // Calculate movement distance vector from first soldier
                 {
-                    movementDistanceVector = soldierTransform.ValueRO.Position - groundInputDataAspect.InputData.ValueRO.GroundInputEndingPos;
+                    movementDistanceVector = soldierMovementData.ValueRO.TargetPosition - groundInputDataAspect.InputData.ValueRO.GroundInputEndingPos;
                     soldierMovementData.ValueRW.TargetPosition = groundInputDataAspect.InputData.ValueRO.GroundInputEndingPos;
                 }
                 else
                 {
-                    soldierMovementData.ValueRW.TargetPosition = soldierTransform.ValueRO.Position - movementDistanceVector;
+                    soldierMovementData.ValueRW.TargetPosition = soldierMovementData.ValueRO.TargetPosition - movementDistanceVector;
                 }
 
                 soldierMovementData.ValueRW.IsOrderTaken = 1;

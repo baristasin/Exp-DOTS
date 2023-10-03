@@ -5,7 +5,7 @@ using Random = Unity.Mathematics.Random;
 
 public class SoldierMono : MonoBehaviour
 {
-    public float MovementSpeed;
+    public GameObject SelectedVisualObject;
 }
 
 public class SoldierBaker : Baker<SoldierMono>
@@ -14,7 +14,11 @@ public class SoldierBaker : Baker<SoldierMono>
     {
         Entity entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
 
-        AddComponent(entity, new SoldierMovementData { MovementSpeed = authoring.MovementSpeed });
+        AddComponent(entity, new SoldierVisualData
+        {
+            SelectedVisualObject = GetEntity(authoring.SelectedVisualObject,TransformUsageFlags.Dynamic)
+        });
+
     }
 }
 

@@ -85,10 +85,10 @@ public partial struct SoldierCreationSystem : ISystem
 
                     ecb.AddComponent(soldierEntity, new SoldierMovementData
                     {
-                        MovementSpeed = Random.Range(7f,10f),
+                        MovementSpeed = Random.Range(7f, 10f),
                         TargetPosition = soldierTransform.Position,
                         TargetRotation = soldierTransform.Rotation,
-                        SoldierCounterAndLineValues = new float2(counter,lineIndex)
+                        SoldierCounterAndLineValues = new float2(counter, lineIndex)
                     });
 
                     SoldierBattalionIdData soldierBattalionIdData = new SoldierBattalionIdData { BattalionId = i };
@@ -101,10 +101,20 @@ public partial struct SoldierCreationSystem : ISystem
                     counter--;
                 }
             }
+
         }
 
         ecb.Playback(state.EntityManager);
         ecb.Dispose();
+
+        var visualEcb = new EntityCommandBuffer(Allocator.Temp);
+        foreach (var visualData in SystemAPI.Query<SoldierVisualData>())
+        {
+            visualEcb.SetEnabled(visualData.SelectedVisualObject, false);
+        }
+
+        visualEcb.Playback(state.EntityManager);
+        visualEcb.Dispose();
 
         state.Enabled = false;
     }

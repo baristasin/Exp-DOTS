@@ -30,9 +30,10 @@ public partial class BattalionClickInputSystemBase : SystemBase
 
             if (!Input.GetKey(KeyCode.T))
             {
-                foreach (var (movementData, entity) in SystemAPI.Query<SoldierMovementData>().WithEntityAccess())
+                foreach (var (visualData, entity) in SystemAPI.Query<SoldierVisualData>().WithEntityAccess())
                 {
                     ecb.SetSharedComponentManaged<SoldierBattalionIsChosenData>(entity, new SoldierBattalionIsChosenData { IsBattalionChosen = 0 });
+                    ecb.SetEnabled(visualData.SelectedVisualObject, false);
                 }
 
                 unitCirclePropertiesAspect.UnitCirclePropData.ValueRW.CurrentSelectedSoldierCount = 0;
@@ -41,8 +42,6 @@ public partial class BattalionClickInputSystemBase : SystemBase
 
                 ecb.AddBuffer<UnitCircleSelectedBattalionAndCountBufferElementData>(unitCirclePropertiesEntity);
             }
-
-
 
             var soldierEntity = GetSoldierEntity();
 
@@ -56,10 +55,11 @@ public partial class BattalionClickInputSystemBase : SystemBase
 
                 var soldierBattalionData = EntityManager.GetSharedComponent<SoldierBattalionIdData>(soldierEntity);
 
-                foreach (var (movementData, entity) in SystemAPI.Query<SoldierMovementData>().WithEntityAccess().WithSharedComponentFilter<SoldierBattalionIdData>
+                foreach (var (movementData,visualData, entity) in SystemAPI.Query<SoldierMovementData,SoldierVisualData>().WithEntityAccess().WithSharedComponentFilter<SoldierBattalionIdData>
                     (new SoldierBattalionIdData { BattalionId = soldierBattalionData.BattalionId }))
                 {
                     ecb.SetSharedComponentManaged<SoldierBattalionIsChosenData>(entity, new SoldierBattalionIsChosenData { IsBattalionChosen = 1 });
+                    ecb.SetEnabled(visualData.SelectedVisualObject, true);
                     counter++;
                 }
 

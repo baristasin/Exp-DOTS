@@ -117,7 +117,7 @@ public partial class BattalionClickInputSystemBase : SystemBase
             Filter = new CollisionFilter
             {
                 BelongsTo = ~0u,
-                CollidesWith = ~0u,
+                CollidesWith = (uint) 1 << 0,
                 GroupIndex = 0
             }
         };

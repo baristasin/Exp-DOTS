@@ -72,7 +72,7 @@ public partial class GroundInputSystemBase : SystemBase
             Filter = new CollisionFilter
             {
                 BelongsTo = ~0u,
-                CollidesWith = ~0u,
+                CollidesWith = (uint) 1 << 2,
                 GroupIndex = 0
             }
         };

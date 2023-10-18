@@ -2,6 +2,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
+using Unity.Transforms;
 using UnityEngine;
 
 //[DisableAutoCreation]
@@ -22,6 +23,35 @@ public partial class BattalionClickInputSystemBase : SystemBase
     {
         var unitCirclePropertiesEntity = SystemAPI.GetSingletonEntity<UnitCirclePropertiesData>();
         var unitCirclePropertiesAspect = SystemAPI.GetAspect<UnitCirclePropertiesAspect>(unitCirclePropertiesEntity);
+
+        if (Input.GetKey(KeyCode.B))
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                var soldierEntity = GetSoldierEntity();
+
+                if (SystemAPI.HasComponent<LocalTransform>(soldierEntity) && SystemAPI.HasComponent<EnemySoldierTag>(soldierEntity))
+                {
+                    var ecb = new EntityCommandBuffer(Allocator.Temp);
+                    var soldierEntityLocalTransform = SystemAPI.GetComponent<LocalTransform>(soldierEntity);
+
+                    foreach (var (soldierMovementData, selectedSoldierEntity) in SystemAPI.Query<SoldierMovementData>().WithEntityAccess().
+                        WithSharedComponentFilter<SoldierBattalionIsChosenData>(new SoldierBattalionIsChosenData { IsBattalionChosen = 1 }))
+                    {
+                        ecb.AddComponent(selectedSoldierEntity,
+                            new SoldierChaseData
+                            {
+                                EnemyBattalionId = EntityManager.GetSharedComponent<SoldierBattalionIdData>(soldierEntity).BattalionId,
+                                EnemyLocalTransform = soldierEntityLocalTransform
+                            });
+                    }
+
+                    Debug.Log("Enemy targeted");
+                    ecb.Playback(EntityManager);
+                    return;
+                }
+            }
+        }
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -45,6 +75,12 @@ public partial class BattalionClickInputSystemBase : SystemBase
 
             var soldierEntity = GetSoldierEntity();
 
+            if (SystemAPI.HasComponent<EnemySoldierTag>(soldierEntity))
+            {
+                ecb.Playback(EntityManager);
+                return;
+            }
+
             if (SystemAPI.HasComponent<SoldierMovementData>(soldierEntity))
             {
                 Debug.Log("Soldier clicked");
@@ -55,7 +91,7 @@ public partial class BattalionClickInputSystemBase : SystemBase
 
                 var soldierBattalionData = EntityManager.GetSharedComponent<SoldierBattalionIdData>(soldierEntity);
 
-                foreach (var (movementData,visualData, entity) in SystemAPI.Query<SoldierMovementData,SoldierVisualData>().WithEntityAccess().WithSharedComponentFilter<SoldierBattalionIdData>
+                foreach (var (movementData, visualData, entity) in SystemAPI.Query<SoldierMovementData, SoldierVisualData>().WithEntityAccess().WithSharedComponentFilter<SoldierBattalionIdData>
                     (new SoldierBattalionIdData { BattalionId = soldierBattalionData.BattalionId }))
                 {
                     ecb.SetSharedComponentManaged<SoldierBattalionIsChosenData>(entity, new SoldierBattalionIsChosenData { IsBattalionChosen = 1 });
@@ -71,24 +107,6 @@ public partial class BattalionClickInputSystemBase : SystemBase
             }
 
             ecb.Playback(EntityManager);
-
-            //else
-            //{
-            //    // Send clear all choose
-
-            //    var ecb = new EntityCommandBuffer(Allocator.Temp);
-
-            //    foreach (var (movementData, entity) in SystemAPI.Query<SoldierMovementData>().WithEntityAccess())
-            //    {
-            //        ecb.SetSharedComponentManaged<SoldierBattalionIsChosenData>(entity, new SoldierBattalionIsChosenData { IsBattalionChosen = 0 });
-            //    }
-
-            //    unitCirclePropertiesAspect.UnitCirclePropData.ValueRW.CurrentSelectedSoldierCount = 0;
-
-            //    Debug.Log("All selections canceled");
-
-            //    ecb.Playback(EntityManager);
-            //}
         }
     }
 
@@ -117,7 +135,7 @@ public partial class BattalionClickInputSystemBase : SystemBase
             Filter = new CollisionFilter
             {
                 BelongsTo = ~0u,
-                CollidesWith = (uint) 1 << 0,
+                CollidesWith = (uint)1 << 0,
                 GroupIndex = 0
             }
         };

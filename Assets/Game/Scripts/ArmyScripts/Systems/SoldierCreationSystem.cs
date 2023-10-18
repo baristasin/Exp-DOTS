@@ -99,6 +99,11 @@ public partial struct SoldierCreationSystem : ISystem
                     ecb.AddSharedComponent(soldierEntity, soldierBattalionIsChosenData);
 
                     counter--;
+
+                    if(i == soldierCreatePropsBuffer.Length - 1)
+                    {
+                        ecb.AddComponent(soldierEntity, new EnemySoldierTag());
+                    }
                 }
             }
 

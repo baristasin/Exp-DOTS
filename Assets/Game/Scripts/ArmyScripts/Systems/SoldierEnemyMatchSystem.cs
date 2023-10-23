@@ -3,6 +3,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 
 //[DisableAutoCreation]
 [UpdateInGroup(typeof(SimulationSystemGroup))]
@@ -11,6 +12,7 @@ public partial struct SoldierEnemyMatchSystem : ISystem
 {
     private NativeArray<LocalTransform> _localTransforms;
     private int _currentEnemyBattalionId;
+    private int _soldierCount;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -31,16 +33,22 @@ public partial struct SoldierEnemyMatchSystem : ISystem
         {
             if (_currentEnemyBattalionId != soldierChaseData.ValueRO.EnemyBattalionId)
             {
-                _localTransforms = new NativeArray<LocalTransform>(100,Allocator.Persistent);                
                 _currentEnemyBattalionId = soldierChaseData.ValueRO.EnemyBattalionId;
             }
 
-            int counter = 0;
-
-            if (math.Equals(_localTransforms[0].Position,new float3(0,0,0)))
+            if (_soldierCount == 0)
             {
                 foreach (var (enemyLocalTransform, enemySoldierMovementData) in SystemAPI.Query<LocalTransform, SoldierMovementData>()
                     .WithSharedComponentFilter<SoldierBattalionIdData>(new SoldierBattalionIdData { BattalionId = soldierChaseData.ValueRO.EnemyBattalionId }))
+                {
+                    _soldierCount++;
+                }
+
+                _localTransforms = new NativeArray<LocalTransform>(_soldierCount, Allocator.Persistent);
+                int counter = 0;
+
+                foreach (var (enemyLocalTransform, enemySoldierMovementData) in SystemAPI.Query<LocalTransform, SoldierMovementData>()
+    .WithSharedComponentFilter<SoldierBattalionIdData>(new SoldierBattalionIdData { BattalionId = soldierChaseData.ValueRO.EnemyBattalionId }))
                 {
                     _localTransforms[counter] = enemyLocalTransform;
                     counter++;
@@ -48,20 +56,11 @@ public partial struct SoldierEnemyMatchSystem : ISystem
             }
             else
             {
-                //if (_localTransforms.Length > soldierEntity.Index)
-                //{
-                //    soldierChaseData.ValueRW.EnemyLocalTransform = _localTransforms[soldierEntity.Index];
-                //}
-                //else
-                //{
-                //    soldierChaseData.ValueRW.EnemyLocalTransform = _localTransforms[Random.CreateFromIndex((uint)soldierEntity.Index).NextInt(0, _localTransforms.Length)];
-                //}
-
                 var currentEnemyLocalTransform = soldierChaseData.ValueRO.EnemyLocalTransform;
 
                 for (int i = 0; i < _localTransforms.Length; i++)
                 {
-                    if (math.distance(soldierLocalTransform.ValueRO.Position,currentEnemyLocalTransform.Position)
+                    if (math.distance(soldierLocalTransform.ValueRO.Position, currentEnemyLocalTransform.Position)
                         > math.distance(soldierLocalTransform.ValueRO.Position, _localTransforms[i].Position))
                     {
                         soldierChaseData.ValueRW.EnemyLocalTransform = _localTransforms[i];
@@ -69,5 +68,6 @@ public partial struct SoldierEnemyMatchSystem : ISystem
                 }
             }
         }
+        _soldierCount = 0;
     }
 }

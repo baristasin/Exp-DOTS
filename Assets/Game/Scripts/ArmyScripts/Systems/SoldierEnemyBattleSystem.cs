@@ -53,9 +53,11 @@ public partial struct ChaseEnemyJob : IJobEntity
 
     public void Execute(SoldierAspect soldierAspect, SoldierChaseData soldierChaseData)
     {
-        if (math.distance(soldierAspect.SoldierTransform.ValueRO.Position, soldierChaseData.EnemyLocalTransform.Position) > 1f) // Chase
+        float3 enemyPositionAligned = new float3(soldierChaseData.EnemyLocalTransform.Position.x,soldierAspect.SoldierTransform.ValueRO.Position.y, soldierChaseData.EnemyLocalTransform.Position.z);
+
+        if (math.distance(soldierAspect.SoldierTransform.ValueRO.Position, enemyPositionAligned) > 1f) // Chase
         {
-            soldierAspect.SoldierMovementData.ValueRW.TargetPosition = soldierChaseData.EnemyLocalTransform.Position;
+            soldierAspect.SoldierMovementData.ValueRW.TargetPosition = enemyPositionAligned;
         }
         else // Attack
         {

@@ -21,7 +21,7 @@ public readonly partial struct SoldierAspect : IAspect
         {
             if (SoldierMovementData.ValueRW.IsOrderTaken == 0 && distToTarget < 1f)
             {
-                SoldierTransform.ValueRW.Rotation = SoldierMovementData.ValueRO.TargetRotation;
+                //SoldierTransform.ValueRW.Rotation = SoldierMovementData.ValueRO.TargetRotation;
                 return;
             }
 
@@ -30,26 +30,30 @@ public readonly partial struct SoldierAspect : IAspect
                 SoldierMovementData.ValueRW.OrderStartDelay -= deltaTime;
                 return;
             }
-            SoldierTransform.ValueRW.Position += math.normalize(SoldierMovementData.ValueRO.TargetPosition - SoldierTransform.ValueRO.Position) * deltaTime * SoldierMovementData.ValueRO.MovementSpeed;
+
+            float3 targetPositionAligned = new float3(SoldierMovementData.ValueRO.TargetPosition.x, SoldierTransform.ValueRO.Position.y, SoldierMovementData.ValueRO.TargetPosition.z);
+
+            SoldierTransform.ValueRW.Position += math.normalize(targetPositionAligned - SoldierTransform.ValueRO.Position) * deltaTime * SoldierMovementData.ValueRO.MovementSpeed;
 
             if (distToTarget <= 0.055f)
             {
-                SoldierMovementData.ValueRW.IsOrderTaken = 0;
+                //SoldierMovementData.ValueRW.IsOrderTaken = 0;
 
             }
 
             if (distToTarget < 0.2f)
             {
-                SoldierTransform.ValueRW.Rotation = SoldierMovementData.ValueRO.TargetRotation;
+                //SoldierTransform.ValueRW.Rotation = SoldierMovementData.ValueRO.TargetRotation;
             }
             else
             {
-                SoldierTransform.ValueRW.Rotation = quaternion.RotateY(RotateTowards(SoldierTransform.ValueRO.Position, SoldierMovementData.ValueRO.TargetPosition));
+                SoldierTransform.ValueRW.Rotation = quaternion.RotateY(RotateTowards(SoldierTransform.ValueRO.Position, targetPositionAligned));
             }
         }
         else
         {
-            SoldierTransform.ValueRW.Position = SoldierMovementData.ValueRO.TargetPosition;
+            float3 targetPositionAligned = new float3(SoldierMovementData.ValueRO.TargetPosition.x, SoldierTransform.ValueRO.Position.y, SoldierMovementData.ValueRO.TargetPosition.z);
+            SoldierTransform.ValueRW.Position = targetPositionAligned;
             SoldierTransform.ValueRW.Rotation = SoldierMovementData.ValueRO.TargetRotation;
         }
     }

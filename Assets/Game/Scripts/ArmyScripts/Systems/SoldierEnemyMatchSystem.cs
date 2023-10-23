@@ -30,6 +30,8 @@ public partial struct SoldierEnemyMatchSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        var ecb = new EntityCommandBuffer(Allocator.Temp);
+
         foreach (var (soldierLocalTransform, soldierMovementData, soldierChaseData, soldierEntity) in SystemAPI.Query<RefRW<LocalTransform>, SoldierMovementData, RefRW<SoldierChaseData>>().WithEntityAccess())
         {
             if (_currentEnemyBattalionId != soldierChaseData.ValueRO.EnemyBattalionId)
@@ -46,6 +48,11 @@ public partial struct SoldierEnemyMatchSystem : ISystem
                     {
                         _soldierCount++;
                     }
+                }
+
+                if(_soldierCount <= 0)
+                {
+                    ecb.RemoveComponent(soldierEntity, typeof(SoldierChaseData));
                 }
 
                 _localTransforms = new NativeArray<LocalTransform>(_soldierCount, Allocator.Persistent);
@@ -90,6 +97,7 @@ public partial struct SoldierEnemyMatchSystem : ISystem
                 }
             }
         }
+        ecb.Playback(state.EntityManager);
         _soldierCount = 0;
     }
 }

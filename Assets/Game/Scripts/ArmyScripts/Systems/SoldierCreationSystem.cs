@@ -78,14 +78,14 @@ public partial struct SoldierCreationSystem : ISystem
 
                     LocalTransform soldierTransform = new LocalTransform
                     {
-                        Position = new float3(counter * 1.3f + horizontalBattalionOffset, 1.5f, -lineIndex * 1.3f),
+                        Position = new float3(counter * 1.3f + horizontalBattalionOffset, 0f, -lineIndex * 1.3f),
                         Rotation = quaternion.identity,
                         Scale = 1f
                     };
 
                     ecb.AddComponent(soldierEntity, new SoldierMovementData
                     {
-                        MovementSpeed = Random.Range(7f, 10f),
+                        MovementSpeed = Random.Range(3f, 4f),
                         TargetPosition = soldierTransform.Position,
                         TargetRotation = soldierTransform.Rotation,
                         SoldierCounterAndLineValues = new float2(counter, lineIndex)
@@ -95,7 +95,7 @@ public partial struct SoldierCreationSystem : ISystem
                     SoldierBattalionIsChosenData soldierBattalionIsChosenData = new SoldierBattalionIsChosenData { IsBattalionChosen = 0 };
 
                     ecb.AddComponent(soldierEntity, soldierTransform);
-                    ecb.AddComponent(soldierEntity, new SoldierHealthData { Health = 100 });
+                    ecb.AddComponent(soldierEntity, new SoldierHealthData { Health = 10 });
                     ecb.AddBuffer<SoldierDamageBufferElement>(soldierEntity);
                     ecb.AddSharedComponent(soldierEntity, soldierBattalionIdData);
                     ecb.AddSharedComponent(soldierEntity, soldierBattalionIsChosenData);

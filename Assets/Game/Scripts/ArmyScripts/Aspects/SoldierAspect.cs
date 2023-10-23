@@ -11,6 +11,10 @@ public readonly partial struct SoldierAspect : IAspect
 
     public readonly RefRW<LocalTransform> SoldierTransform;
 
+    public readonly RefRW<SoldierHealthData> SoldierHealthData;
+
+    public readonly DynamicBuffer<SoldierDamageBufferElement> SoldierDamageBuffer;
+
     public void Move(byte IsInstantMove, float deltaTime, float distToTarget, int isOrderedToMove)
     {
         if (IsInstantMove == 0)
@@ -48,6 +52,16 @@ public readonly partial struct SoldierAspect : IAspect
             SoldierTransform.ValueRW.Position = SoldierMovementData.ValueRO.TargetPosition;
             SoldierTransform.ValueRW.Rotation = SoldierMovementData.ValueRO.TargetRotation;
         }
+    }
+
+    public void GetDamage()
+    {
+        foreach (var element in SoldierDamageBuffer)
+        {
+            SoldierHealthData.ValueRW.Health -= element.DamageAmount;
+        }
+
+        SoldierDamageBuffer.Clear();
     }
 
     private float RotateTowards(float3 objectsPosition, float3 targetPosition)

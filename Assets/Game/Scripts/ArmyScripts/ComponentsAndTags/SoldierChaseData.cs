@@ -6,4 +6,5 @@ public struct SoldierChaseData : IComponentData
 {
     public int EnemyBattalionId;
     public LocalTransform EnemyLocalTransform;
+    public Entity EnemyEntity;
 }

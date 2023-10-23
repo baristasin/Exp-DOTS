@@ -95,6 +95,8 @@ public partial struct SoldierCreationSystem : ISystem
                     SoldierBattalionIsChosenData soldierBattalionIsChosenData = new SoldierBattalionIsChosenData { IsBattalionChosen = 0 };
 
                     ecb.AddComponent(soldierEntity, soldierTransform);
+                    ecb.AddComponent(soldierEntity, new SoldierHealthData { Health = 100 });
+                    ecb.AddBuffer<SoldierDamageBufferElement>(soldierEntity);
                     ecb.AddSharedComponent(soldierEntity, soldierBattalionIdData);
                     ecb.AddSharedComponent(soldierEntity, soldierBattalionIsChosenData);
 

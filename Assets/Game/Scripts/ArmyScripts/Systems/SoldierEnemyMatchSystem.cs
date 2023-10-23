@@ -10,7 +10,8 @@ using UnityEngine;
 [BurstCompile]
 public partial struct SoldierEnemyMatchSystem : ISystem
 {
-    private NativeArray<LocalTransform> _localTransforms;
+    public NativeArray<LocalTransform> _localTransforms;
+    public NativeArray<Entity> _enemyEntities;
     private int _currentEnemyBattalionId;
     private int _soldierCount;
 
@@ -38,20 +39,40 @@ public partial struct SoldierEnemyMatchSystem : ISystem
 
             if (_soldierCount == 0)
             {
-                foreach (var (enemyLocalTransform, enemySoldierMovementData) in SystemAPI.Query<LocalTransform, SoldierMovementData>()
-                    .WithSharedComponentFilter<SoldierBattalionIdData>(new SoldierBattalionIdData { BattalionId = soldierChaseData.ValueRO.EnemyBattalionId }))
+                foreach (var (enemyLocalTransform, enemySoldierMovementData, enemyEntity) in SystemAPI.Query<LocalTransform, SoldierMovementData>()
+                    .WithSharedComponentFilter<SoldierBattalionIdData>(new SoldierBattalionIdData { BattalionId = soldierChaseData.ValueRO.EnemyBattalionId }).WithEntityAccess())
                 {
-                    _soldierCount++;
+                    if (enemyEntity != Entity.Null)
+                    {
+                        _soldierCount++;
+                    }
                 }
 
                 _localTransforms = new NativeArray<LocalTransform>(_soldierCount, Allocator.Persistent);
+                _enemyEntities = new NativeArray<Entity>(_soldierCount, Allocator.Persistent);
                 int counter = 0;
 
-                foreach (var (enemyLocalTransform, enemySoldierMovementData) in SystemAPI.Query<LocalTransform, SoldierMovementData>()
-    .WithSharedComponentFilter<SoldierBattalionIdData>(new SoldierBattalionIdData { BattalionId = soldierChaseData.ValueRO.EnemyBattalionId }))
+                foreach (var (enemyLocalTransform, enemySoldierMovementData, enemyEntity) in SystemAPI.Query<LocalTransform, SoldierMovementData>()
+                    .WithSharedComponentFilter<SoldierBattalionIdData>(new SoldierBattalionIdData { BattalionId = soldierChaseData.ValueRO.EnemyBattalionId }).WithEntityAccess())
                 {
-                    _localTransforms[counter] = enemyLocalTransform;
-                    counter++;
+                    if (enemyEntity != Entity.Null)
+                    {
+                        _localTransforms[counter] = enemyLocalTransform;
+                        _enemyEntities[counter] = enemyEntity;
+                        counter++;
+                    }
+                }
+
+                var currentEnemyLocalTransform = soldierChaseData.ValueRO.EnemyLocalTransform;
+
+                for (int i = 0; i < _localTransforms.Length; i++)
+                {
+                    if (soldierChaseData.ValueRO.EnemyEntity == Entity.Null || math.distance(soldierLocalTransform.ValueRO.Position, currentEnemyLocalTransform.Position)
+                        > math.distance(soldierLocalTransform.ValueRO.Position, _localTransforms[i].Position))
+                    {
+                        soldierChaseData.ValueRW.EnemyLocalTransform = _localTransforms[i];
+                        soldierChaseData.ValueRW.EnemyEntity = _enemyEntities[i];
+                    }
                 }
             }
             else
@@ -60,10 +81,11 @@ public partial struct SoldierEnemyMatchSystem : ISystem
 
                 for (int i = 0; i < _localTransforms.Length; i++)
                 {
-                    if (math.distance(soldierLocalTransform.ValueRO.Position, currentEnemyLocalTransform.Position)
+                    if (soldierChaseData.ValueRO.EnemyEntity == Entity.Null || math.distance(soldierLocalTransform.ValueRO.Position, currentEnemyLocalTransform.Position)
                         > math.distance(soldierLocalTransform.ValueRO.Position, _localTransforms[i].Position))
                     {
                         soldierChaseData.ValueRW.EnemyLocalTransform = _localTransforms[i];
+                        soldierChaseData.ValueRW.EnemyEntity = _enemyEntities[i];
                     }
                 }
             }

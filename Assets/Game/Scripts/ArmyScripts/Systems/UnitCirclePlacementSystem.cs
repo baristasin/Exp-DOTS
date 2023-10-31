@@ -135,7 +135,7 @@ public partial struct CreateUnitCirclesJob : IJob
 
         LocalTransform localTransform = new LocalTransform
         {
-            Position = new float3(Counter, 0.5f, 0),
+            Position = new float3(Counter, -1f, 0),
             Rotation = quaternion.identity,
             Scale = 1f
         };

@@ -32,7 +32,7 @@ public partial struct SoldierEnemyMatchSystem : ISystem
     {
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
-        foreach (var (soldierLocalTransform, soldierMovementData, soldierChaseData, soldierEntity) in SystemAPI.Query<RefRW<LocalTransform>, SoldierMovementData, RefRW<SoldierChaseData>>().WithEntityAccess())
+        foreach (var (soldierLocalTransform, soldierMovementData, soldierChaseData, soldierEntity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<SoldierMovementData>, RefRW<SoldierChaseData>>().WithEntityAccess())
         {
             if (_currentEnemyBattalionId != soldierChaseData.ValueRO.EnemyBattalionId)
             {
@@ -53,6 +53,8 @@ public partial struct SoldierEnemyMatchSystem : ISystem
                 if(_soldierCount <= 0)
                 {
                     ecb.RemoveComponent(soldierEntity, typeof(SoldierChaseData));
+                    state.EntityManager.GetAspect<SoldierAspect>(soldierEntity).StopSoldier();
+                    Debug.Log("EnemiesDead");
                 }
 
                 _localTransforms = new NativeArray<LocalTransform>(_soldierCount, Allocator.Persistent);

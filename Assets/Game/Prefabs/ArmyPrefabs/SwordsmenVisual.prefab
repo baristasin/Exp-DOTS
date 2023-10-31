@@ -572,6 +572,40 @@ MonoBehaviour:
       loop: 1
       additionalAnimatorParameterValues: []
       additionalAnimatorStatesPerLayer: []
+    - animationID: SwordsmenRun
+      animatorStateName: SwordsmenRun
+      animationType: 0
+      singleClipData:
+        animationClip: {fileID: 7400000, guid: 51eda0cb9a6d349429373e2ba548854a, type: 2}
+      dualClipBlendData:
+        blendParameterName: 
+        clip1:
+          parameterValue: 0
+          animationClip: {fileID: 0}
+        clip2:
+          parameterValue: 0
+          animationClip: {fileID: 0}
+        nbrOfInBetweenSamples: 0
+      loop: 1
+      additionalAnimatorParameterValues: []
+      additionalAnimatorStatesPerLayer: []
+    - animationID: SwordsmenAttack
+      animatorStateName: SwordsmenAttack
+      animationType: 0
+      singleClipData:
+        animationClip: {fileID: 7400000, guid: 85a66a8e5ab1b44afa13d78b610f4ba6, type: 2}
+      dualClipBlendData:
+        blendParameterName: 
+        clip1:
+          parameterValue: 0
+          animationClip: {fileID: 0}
+        clip2:
+          parameterValue: 0
+          animationClip: {fileID: 0}
+        nbrOfInBetweenSamples: 0
+      loop: 1
+      additionalAnimatorParameterValues: []
+      additionalAnimatorStatesPerLayer: []
     generateAnimationIdsEnum: 0
     animationIdsEnumName: 
     usePredefinedAnimationEventIds: 0
@@ -586,7 +620,7 @@ MonoBehaviour:
       boneUsagesPerLoD: []
     transformUsageFlagsParent: 2
     transformUsageFlagsChildren: 1
-  gpuEcsAnimator: {fileID: 7770442509446264375, guid: 08075deca292e41b88b70b228708b485, type: 3}
+  gpuEcsAnimator: {fileID: 8154581416407449025, guid: 08075deca292e41b88b70b228708b485, type: 3}
 --- !u!1 &5197208223640871410
 GameObject:
   m_ObjectHideFlags: 0

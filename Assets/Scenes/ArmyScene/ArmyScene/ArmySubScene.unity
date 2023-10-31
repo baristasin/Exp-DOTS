@@ -446,7 +446,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c9ed23112b94433e890cd06b271f2b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SwordsmenObject: {fileID: 3279124725788853812, guid: 282c942ff49cd489bbd9330c7f60f6d5, type: 3}
+  SwordsmenObject: {fileID: 8154581416407449025, guid: 08075deca292e41b88b70b228708b485, type: 3}
   ArcherObject: {fileID: 3279124725788853812, guid: f83e0fda1e5264a3783e8dd981bf7b06, type: 3}
   KnightObject: {fileID: 3279124725788853812, guid: fde233b14fd244d319f80f87d5598832, type: 3}
   SoldierCreatePropsDatas:

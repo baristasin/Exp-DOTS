@@ -1,3 +1,4 @@
+using GPUECSAnimationBaker.Engine.AnimatorSystem;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -115,7 +116,7 @@ public partial struct SoldierMoveOrderSystem : ISystem
             }
 
 
-            //var ecb = new EntityCommandBuffer(Allocator.Temp);
+            var ecb = new EntityCommandBuffer(Allocator.Temp);
 
             //ecb.RemoveComponent<UnitCirclePlacementBufferElementData>(unitCirclePropertiesEntity);
 
@@ -151,7 +152,7 @@ public partial struct SoldierMoveOrderSystem : ISystem
         {
             IsInstantMove = IsInstantMove,
             DeltaTime = deltaTime
-        }.ScheduleParallel();
+        }.Run();
 
     }
 }
@@ -171,6 +172,11 @@ public partial struct SoldierMoveJob : IJobEntity
         if (Vector3.Distance(soldierAspect.SoldierTransform.ValueRO.Position, targetPositionAligned) is var distToTarget && distToTarget >= 0.05f)
         {
             soldierAspect.Move(IsInstantMove, DeltaTime, distToTarget, distToTarget >= 0.5f ? 1 : 0);
+            //soldierAspect.SoldierMovementData.IsMoving = 1;
+        }
+        else // Idle
+        {
+            //soldierAspect.SoldierMovementData.IsMoving = 0;
         }
     }
 }

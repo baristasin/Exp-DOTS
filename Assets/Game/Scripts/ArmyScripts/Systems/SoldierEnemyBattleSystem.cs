@@ -58,13 +58,24 @@ public partial struct ChaseEnemyJob : IJobEntity
         if (math.distance(soldierAspect.SoldierTransform.ValueRO.Position, enemyPositionAligned) > 1f) // Chase
         {
             soldierAspect.SoldierMovementData.ValueRW.TargetPosition = enemyPositionAligned;
+            soldierAspect.SoldierMovementData.ValueRW.TargetRotation = quaternion.RotateY(RotateTowards(soldierAspect.SoldierTransform.ValueRO.Position, enemyPositionAligned));
         }
         else // Attack
         {
             if (EntityManager.HasBuffer<SoldierDamageBufferElement>(soldierChaseData.EnemyEntity))
             {
                 EntityCommandBuffer.AppendToBuffer(soldierChaseData.EnemyEntity, new SoldierDamageBufferElement { DamageAmount = 1 });
+                soldierAspect.SoldierAnimationData.ValueRW.AnimationType = AnimationType.Attacking;
             }
         }
     }
+
+    private float RotateTowards(float3 objectsPosition, float3 targetPosition)
+    {
+        var x = objectsPosition.x - targetPosition.x;
+        var y = objectsPosition.z - targetPosition.z;
+
+        return math.atan2(x, y) + math.PI;
+    }
 }
+

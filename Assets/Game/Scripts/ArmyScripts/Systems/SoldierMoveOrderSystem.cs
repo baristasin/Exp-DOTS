@@ -169,14 +169,14 @@ public partial struct SoldierMoveJob : IJobEntity
         //soldierAspect.SoldierMovementData.ValueRW.TargetPosition = new float3(soldierAspect.SoldierMovementData.ValueRW.TargetPosition.x, soldierAspect.SoldierTransform.ValueRO.Position.y, soldierAspect.SoldierMovementData.ValueRW.TargetPosition.z);
         float3 targetPositionAligned = new float3(soldierAspect.SoldierMovementData.ValueRO.TargetPosition.x, soldierAspect.SoldierTransform.ValueRO.Position.y, soldierAspect.SoldierMovementData.ValueRO.TargetPosition.z);
 
-        if (Vector3.Distance(soldierAspect.SoldierTransform.ValueRO.Position, targetPositionAligned) is var distToTarget && distToTarget >= 0.05f)
-        {
-            soldierAspect.Move(IsInstantMove, DeltaTime, distToTarget, distToTarget >= 0.5f ? 1 : 0);
+        //if (Vector3.Distance(soldierAspect.SoldierTransform.ValueRO.Position, targetPositionAligned) is var distToTarget && distToTarget >= 0.05f)
+        //{
+            soldierAspect.Move(IsInstantMove, DeltaTime);
             //soldierAspect.SoldierMovementData.IsMoving = 1;
-        }
-        else // Idle
-        {
-            //soldierAspect.SoldierMovementData.IsMoving = 0;
-        }
+        //}
+        //else // Idle
+        //{
+        //    //soldierAspect.SoldierMovementData.IsMoving = 0;
+        //}
     }
 }

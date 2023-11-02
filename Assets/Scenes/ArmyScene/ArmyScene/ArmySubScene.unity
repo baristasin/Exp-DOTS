@@ -458,7 +458,7 @@ MonoBehaviour:
     SoldierCount: 100
   - SoldierType: 0
     SoldierCount: 100
-  - SoldierType: 1
+  - SoldierType: 0
     SoldierCount: 100
 --- !u!1 &645817302
 GameObject:

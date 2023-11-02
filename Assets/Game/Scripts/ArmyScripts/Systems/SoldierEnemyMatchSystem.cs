@@ -37,6 +37,7 @@ public partial struct SoldierEnemyMatchSystem : ISystem
             if (_currentEnemyBattalionId != soldierChaseData.ValueRO.EnemyBattalionId)
             {
                 _currentEnemyBattalionId = soldierChaseData.ValueRO.EnemyBattalionId;
+                _soldierCount = 0;
             }
 
             if (_soldierCount == 0)
@@ -50,7 +51,10 @@ public partial struct SoldierEnemyMatchSystem : ISystem
                     }
                 }
 
-                if(_soldierCount <= 0)
+                Debug.Log($"avaible soldiers: {_soldierCount}");
+
+
+                if (_soldierCount <= 0)
                 {
                     ecb.RemoveComponent(soldierEntity, typeof(SoldierChaseData));
                     state.EntityManager.GetAspect<SoldierAspect>(soldierEntity).StopSoldier();

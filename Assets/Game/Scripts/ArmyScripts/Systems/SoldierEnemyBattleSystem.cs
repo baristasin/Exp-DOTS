@@ -25,7 +25,7 @@ public partial struct SoldierEnemyBattleSystem : ISystem
 
     }
 
-    [BurstCompile]
+    //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         state.CompleteDependency();
@@ -53,9 +53,9 @@ public partial struct ChaseEnemyJob : IJobEntity
 
     public void Execute(SoldierAspect soldierAspect, SoldierChaseData soldierChaseData)
     {
-        float3 enemyPositionAligned = new float3(soldierChaseData.EnemyLocalTransform.Position.x,soldierAspect.SoldierTransform.ValueRO.Position.y, soldierChaseData.EnemyLocalTransform.Position.z);
+        float3 enemyPositionAligned = new float3(soldierChaseData.EnemyLocalTransform.Position.x, soldierAspect.SoldierTransform.ValueRO.Position.y, soldierChaseData.EnemyLocalTransform.Position.z);
 
-        if (math.distance(soldierAspect.SoldierTransform.ValueRO.Position, enemyPositionAligned) > 1f) // Chase
+        if (math.distance(soldierAspect.SoldierTransform.ValueRO.Position, enemyPositionAligned) > 2f) // Chase
         {
             soldierAspect.SoldierMovementData.ValueRW.TargetPosition = enemyPositionAligned;
             soldierAspect.SoldierMovementData.ValueRW.TargetRotation = quaternion.RotateY(RotateTowards(soldierAspect.SoldierTransform.ValueRO.Position, enemyPositionAligned));
@@ -64,7 +64,19 @@ public partial struct ChaseEnemyJob : IJobEntity
         {
             if (EntityManager.HasBuffer<SoldierDamageBufferElement>(soldierChaseData.EnemyEntity))
             {
+                soldierAspect.SoldierMovementData.ValueRW.TargetRotation = quaternion.RotateY(RotateTowards(soldierAspect.SoldierTransform.ValueRO.Position, enemyPositionAligned));
+
                 EntityCommandBuffer.AppendToBuffer(soldierChaseData.EnemyEntity, new SoldierDamageBufferElement { DamageAmount = 1 });
+
+                if (EntityManager.HasComponent<SoldierChaseData>(soldierChaseData.EnemyEntity) == false)
+                {
+                    EntityCommandBuffer.AddComponent(soldierChaseData.EnemyEntity, new SoldierChaseData
+                    {
+                        EnemyBattalionId = soldierAspect.SoldierBattalionIdData.BattalionId,
+                        EnemyEntity = soldierAspect.Entity,
+                        EnemyLocalTransform = soldierAspect.SoldierTransform.ValueRW
+                    });
+                }
                 soldierAspect.SoldierAnimationData.ValueRW.AnimationType = AnimationType.Attacking;
             }
         }

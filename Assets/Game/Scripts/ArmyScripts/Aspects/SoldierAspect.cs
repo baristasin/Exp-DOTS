@@ -16,6 +16,8 @@ public readonly partial struct SoldierAspect : IAspect
 
     public readonly RefRW<SoldierAnimationData> SoldierAnimationData;
 
+    public readonly SoldierBattalionIdData SoldierBattalionIdData;
+
     public readonly DynamicBuffer<SoldierDamageBufferElement> SoldierDamageBuffer;
 
     public void Move(byte IsInstantMove, float deltaTime)
@@ -25,55 +27,22 @@ public readonly partial struct SoldierAspect : IAspect
 
         if (IsInstantMove == 0)
         {
-            if (SoldierMovementData.ValueRW.IsOrderTaken == 0 && distToTarget < 1f)
-            {
-                //SoldierTransform.ValueRW.Rotation = SoldierMovementData.ValueRO.TargetRotation;
-                //if (SoldierAnimationData.ValueRW.AnimationType != AnimationType.Attacking)
-                //{
-                //    SoldierAnimationData.ValueRW.AnimationType = AnimationType.Idle;
-                //}
-
-                return;
-            }
-
             if (SoldierMovementData.ValueRW.OrderStartDelay > 0)
             {
                 SoldierMovementData.ValueRW.OrderStartDelay -= deltaTime;
-                //SoldierAnimationData.ValueRW.AnimationType = AnimationType.Idle;
                 return;
-            }
-
-            if (distToTarget > 0.2f)
-            {
-                SoldierTransform.ValueRW.Position += math.normalize(targetPositionAligned - SoldierTransform.ValueRO.Position) * deltaTime * SoldierMovementData.ValueRO.MovementSpeed;
-                SoldierAnimationData.ValueRW.AnimationType = AnimationType.Running;
-            }
-            else
-            {
-                SoldierTransform.ValueRW.Position = targetPositionAligned;
-                SoldierAnimationData.ValueRW.AnimationType = AnimationType.Idle;
-            }
-            //SoldierAnimationData.ValueRW.AnimationType = AnimationType.Running;
-
-            if (distToTarget <= 0.055f)
-            {
-                //SoldierMovementData.ValueRW.IsOrderTaken = 0;
-
             }
 
             if (distToTarget < 0.1f)
             {
-                //SoldierTransform.ValueRW.Rotation = quaternion.RotateY(RotateTowards(SoldierTransform.ValueRO.Position, targetPositionAligned));
-                //if (SoldierAnimationData.ValueRW.AnimationType != AnimationType.Attacking)
-                //{
-                //    SoldierAnimationData.ValueRW.AnimationType = AnimationType.Idle;
-                //}
                 SoldierTransform.ValueRW.Rotation = SoldierMovementData.ValueRO.TargetRotation;
+                SoldierTransform.ValueRW.Position = targetPositionAligned;
+                SoldierAnimationData.ValueRW.AnimationType = AnimationType.Idle;
             }
             else
             {
-                //SoldierTransform.ValueRW.Rotation = quaternion.RotateY(RotateTowards(SoldierTransform.ValueRO.Position, targetPositionAligned));
-                //SoldierTransform.ValueRW.Rotation = SoldierMovementData.ValueRO.TargetRotation;
+                SoldierTransform.ValueRW.Position += math.normalize(targetPositionAligned - SoldierTransform.ValueRO.Position) * deltaTime * SoldierMovementData.ValueRO.MovementSpeed;
+                SoldierAnimationData.ValueRW.AnimationType = AnimationType.Running;
                 SoldierTransform.ValueRW.Rotation = math.slerp(SoldierTransform.ValueRW.Rotation, quaternion.RotateY(RotateTowards(SoldierTransform.ValueRO.Position, targetPositionAligned)), deltaTime * 5f);
             }
         }
